@@ -10,7 +10,6 @@ draft: false
 If you want to recursively create `.webp` versions of images in a folder (same name, saved in same location, different extension name), this script will do that
 
 ```bash
-#!/bin/bash
 while IFS= read -r -d '' file; do
   cwebp -q 90 "$file" -o "${file%.*}.webp" || true
 done < <(find ./ -type f \( -name "*.png" -o -name "*.jpg" \) -print0)
