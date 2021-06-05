@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="thoughts.theden.sh — Denis Khoshaba">
+    
+    <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
+    
+    <link rel="stylesheet" href="/css/style.min.css">
+
+    <title>Unix philosophy-esque approach to web tooling</title>
+</head>
+<body><header id="banner">
+    <h2><a href="https://thoughts.theden.sh/">thoughts.theden.sh</a></h2>
+    <nav>
+        <ul>
+            
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>Unix philosophy-esque approach to web tooling</h1>
+            <div>
+                <time>May 12, 2020</time>
+                </div>
+    </header><p>[Ongoing: <a href="https://github.com/TheDen/thoughts.theden.sh">Suggestions welcome</a>]</p>
+<h1 id="creating-webp-images">Creating WebP images</h1>
+<p>If you want to recursively create <code>.webp</code> versions of images in a folder (same name, saved in same location, different extension name), this script will do that</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="cp">#!/bin/bash
+</span><span class="cp"></span><span class="k">while</span> <span class="nv">IFS</span><span class="o">=</span> <span class="nb">read</span> -r -d <span class="s1">&#39;&#39;</span> file<span class="p">;</span> <span class="k">do</span>
+  cwebp -q <span class="m">90</span> <span class="s2">&#34;</span><span class="nv">$file</span><span class="s2">&#34;</span> -o <span class="s2">&#34;</span><span class="si">${</span><span class="nv">file</span><span class="p">%.*</span><span class="si">}</span><span class="s2">.webp&#34;</span> <span class="o">||</span> <span class="nb">true</span>
+<span class="k">done</span> &lt; &lt;<span class="o">(</span>find ./ -type f <span class="se">\(</span> -name <span class="s2">&#34;*.png&#34;</span> -o -name <span class="s2">&#34;*.jpg&#34;</span> <span class="se">\)</span> -print0<span class="o">)</span>
+</code></pre></div><p>Some notes:</p>
+<ul>
+<li><code>cwebp</code> binaries from <a href="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html">libwebp</a> is required.</li>
+<li>The <code>-q 90</code> flag is the quality factor.</li>
+<li>Th snippet assumes that imag files are either <code>.jpg</code> or <code>.png</code>.</li>
+</ul>
+<h1 id="deployment">Deployment</h1>
+<p>Assuming you want <code>dist/</code> to be the deployed folder</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">rsync -av . dist/ --exclude dist/ --exclude .git/ --exclude .gitignore
+</code></pre></div><p>and to push the folder as a specific git branch, for example to deploy it on GitHub pages</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">git subtree push --prefix dist origin gh-pages
+</code></pre></div><h1 id="minification">Minification</h1>
+<p>Using the <a href="https://github.com/tdewolff/minify">minify</a> cli tool</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">find ./dist/ -type f <span class="se">\(</span> <span class="se">\
+</span><span class="se"></span>  -name <span class="s2">&#34;*.html&#34;</span> <span class="se">\
+</span><span class="se"></span>  -o -name <span class="s1">&#39;*.js&#39;</span> <span class="se">\
+</span><span class="se"></span>  -o -name <span class="s1">&#39;*.css&#39;</span> <span class="se">\
+</span><span class="se"></span>  -o -name <span class="s1">&#39;*.svg&#39;</span> <span class="se">\
+</span><span class="se"></span>  -o -name <span class="s2">&#34;*.xml&#34;</span> <span class="se">\
+</span><span class="se"></span>  -o -name <span class="s2">&#34;*.json&#34;</span> <span class="se">\
+</span><span class="se"></span>  -o -name <span class="s2">&#34;*.htm&#34;</span> <span class="se">\
+</span><span class="se"></span>  <span class="se">\)</span> <span class="se">\
+</span><span class="se"></span>  -and ! -name <span class="s2">&#34;*.min*&#34;</span> -print0 <span class="p">|</span>
+  xargs -0 -n1 -P4 -I <span class="s1">&#39;{}&#39;</span> sh -c <span class="s1">&#39;minify -o &#34;{}&#34; &#34;{}&#34;&#39;</span>
+</code></pre></div></article>
+
+        </main><footer id="footer">
+    
+</footer>
+</body>
+</html>

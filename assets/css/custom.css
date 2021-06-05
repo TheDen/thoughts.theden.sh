@@ -1,0 +1,16 @@
+/* index.html styles */
+main#content ul#posts {
+    list-style-type: none;
+    font-size: 16px;
+    font-size: 1.5rem !important;
+    margin-top: 0;
+    padding: 0;
+}
+
+header#banner h2 {
+    font-weight: 400;
+}
+
+main#content h3 {
+	display: none;
+}

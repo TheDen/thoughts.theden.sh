@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="thoughts.theden.sh — Denis Khoshaba">
+    
+    <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
+    
+    <link rel="stylesheet" href="/css/style.min.css">
+
+    <title>Demystifying XML (an attempt)</title>
+</head>
+<body><header id="banner">
+    <h2><a href="https://thoughts.theden.sh/">thoughts</a></h2>
+    <nav>
+        <ul>
+            <li>
+                <a href="/" title="posts">posts</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>Demystifying XML (an attempt)</h1>
+            <div>
+                <time>August 2, 2018</time>
+                </div>
+    </header><h1 id="a-primer">A Primer</h1>
+<p>Some things you should know about <code>XML</code></p>
+<ul>
+<li><code>XML</code> is subset of the <a href="https://en.wikipedia.org/wiki/Standard_Generalized_Markup_Language">Standard Generalized Markup Language</a></li>
+<li><code>XML</code> is meta language, meaning it can be used to define markup by using one of the many <a href="https://en.wikipedia.org/wiki/XML_schema">XML Schemas</a></li>
+<li><code>XML</code>&rsquo;s syntax is formally defined using <a href="https://en.wikipedia.org/wiki/Backus%E2%80%93Naur_form">Backus–Naur form</a></li>
+<li><code>XML</code> uses and supports <a href="https://en.wikipedia.org/wiki/Valid_characters_in_XML">almost all unicode characters</a></li>
+<li><code>XML</code> is over 20 years old!</li>
+</ul>
+<blockquote>
+<p>In 1996, Jon Bosak, Tim Bray, C. M. Sperberg-McQueen, James Clark, and several others began work on a &ldquo;lite&rdquo; version of SGML that retained most of SGML&rsquo;s power while trimming a lot of the features that had proven redundant, too complicated to implement, confusing to end users, or simply not useful over the previous 20 years of experience with SGML. The result, in February of 1998, was XML 1.0, and it was an immediate success. Many developers who knew they needed a structural markup language but hadn&rsquo;t been able to bring themselves to accept SGML&rsquo;s complexity adopted XML whole-heartedly. It was used in domains ranging from legal court filings to hog farming.<sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup></p>
+</blockquote>
+<p>Oh how things have changed&hellip;</p>
+<p>Let&rsquo;s go through some important <code>XML</code>-related specifications</p>
+<h2 id="xml-namespaces">XML namespaces</h2>
+<ul>
+<li>Used for providing uniquely named elements and attributes in an <code>XML</code> document</li>
+<li>The idea is so multiple <code>XML</code> documents can be merged without any collisions or ambiguity</li>
+<li>Delared using <code>xmlns</code> or <code>xmlns:prefix</code>, for example</li>
+</ul>
+<div class="highlight"><pre class="chroma"><code class="language-xml" data-lang="xml"><span class="nt">&lt;x</span> <span class="na">xmlns:edi=</span><span class="s">&#39;http://ecommerce.example.org/schema&#39;</span><span class="nt">&gt;</span>
+  <span class="c">&lt;!-- the &#34;edi&#34; prefix is bound to http://ecommerce.example.org/schema
+</span><span class="c">       for the &#34;x&#34; element and contents --&gt;</span>
+<span class="nt">&lt;/x&gt;</span>
+</code></pre></div><p>then tags will be <code>&lt;edi:foo&gt;&lt;edit:foo&gt;</code></p>
+<h2 id="xml-schemas">XML Schemas</h2>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Document_type_definition">document type definition</a> delaration to define a document type.
+<a href="https://www.w3.org/2009/XMLSchema/XMLSchema.dtd">XML&rsquo;s DTD</a></li>
+<li>You can also use <a href="https://www.w3.org/TR/xmlschema11-1/">XSD</a> <a href="https://www.w3.org/2009/XMLSchema/XMLSchema.xsd">XML&rsquo;s XSD</a></li>
+</ul>
+<h2 id="xslt-extensible-stylesheet-language-transformations">XSLT (eXtensible Stylesheet Language Transformations)</h2>
+<p>Basically used to transform <code>XML</code> documents into other types of documents—such as <code>HTML</code>, plaintext, XSL Formatting Objects (<code>XSL-FO</code>) which is often used to generate <code>pdf</code> files.</p>
+<p>A popular and open source toolkit is <a href="http://xmlsoft.org/">Libxml2</a> (inlcuded in webkit, MacOS, many linux distros)</p>
+<p>Worth noting that <code>XLST</code> is turing complete<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></p>
+<h2 id="xml-path-language-xpath">XML Path Language (XPath)</h2>
+<ul>
+<li>Used to access nodes in a <code>XML</code> document</li>
+<li>Uses a path notation (as in URLs) for navigating through the hierarchical structure of an XML document</li>
+</ul>
+<section class="footnotes" role="doc-endnotes">
+<hr>
+<ol>
+<li id="fn:1" role="doc-endnote">
+<p><a href="https://docstore.mik.ua/orelly/xml/xmlnut/ch01_04.htm">https://docstore.mik.ua/orelly/xml/xmlnut/ch01_04.htm</a>&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+<li id="fn:2" role="doc-endnote">
+<p><a href="https://www.researchgate.net/publication/228560924_A_proof_of_the_Turing-completeness_of_XSLT_and_XQuery">https://www.researchgate.net/publication/228560924_A_proof_of_the_Turing-completeness_of_XSLT_and_XQuery</a>&#160;<a href="#fnref:2" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
+</li>
+</ol>
+</section>
+</article>
+
+        </main><footer id="footer">
+    
+</footer>
+</body>
+</html>

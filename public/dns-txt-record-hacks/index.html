@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="thoughts.theden.sh — Denis Khoshaba">
+    
+    <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
+    
+    <link rel="stylesheet" href="/css/style.min.css">
+
+    <title>DNS TXT Record Hacks</title>
+</head>
+<body><header id="banner">
+    <h2><a href="https://thoughts.theden.sh/">thoughts</a></h2>
+    <nav>
+        <ul>
+            <li>
+                <a href="/" title="posts">posts</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>DNS TXT Record Hacks</h1>
+            <div>
+                <time>January 27, 2021</time>
+                </div>
+    </header><h1 id="specifications-primer">Specifications Primer</h1>
+<p>Reading through the RFC <a href="https://tools.ietf.org/html/rfc1464">Using the Domain Name System To Store Arbitrary String Attributes</a> to summarise the relevant part:</p>
+<blockquote>
+<p>Any printable ASCII character is permitted for the attribute name.</p>
+</blockquote>
+<p>More importantly, on the <code>restrictions</code> section</p>
+<blockquote>
+<p>Some DNS server implementations place limits on the size or number of
+TXT records associated with a particular owner.  Certain
+implementations may not support TXT records at all.</p>
+</blockquote>
+<p>However in <a href="https://tools.ietf.org/html/rfc4408#section-3.1.3">rfc4408 section-3.1.3 </a> a limit is explicitly stated</p>
+<blockquote>
+<p>SPF or TXT records containing multiple strings are useful in constructing records that would exceed the 255-byte maximum length of a string within a single TXT or SPF RR record.</p>
+</blockquote>
+<p>Searching online about the 255-byte limit shows a lot of posts by people trying to bypass it in BIND after the error <code>invalid rdata format: ran out of space</code>.</p>
+<p>So we want to stay below that byte limit for maximum compatibility.</p>
+<h1 id="stuffing-data-in-255-bytes">Stuffing data in 255 bytes</h1>
+<p>One could naively chunk text into 255-byte chunks like this</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nv">lorem_ipsum</span><span class="o">=</span><span class="s2">&#34;Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&#39;s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions&#34;</span>
+
+<span class="nv">offset</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">max_bytes</span><span class="o">=</span><span class="m">255</span>
+
+<span class="c1"># Get first 255 bytes </span>
+<span class="nb">echo</span> -n <span class="s2">&#34;</span><span class="si">${</span><span class="nv">lorem_ipsum</span><span class="si">}</span><span class="s2">&#34;</span> <span class="p">|</span> cut -b <span class="s2">&#34;</span><span class="si">${</span><span class="nv">offset</span><span class="p">-</span><span class="nv">$max_bytes</span><span class="si">}</span><span class="s2">&#34;</span> <span class="p">|</span>  tr -d <span class="s1">$&#39;\n&#39;</span> <span class="p">|</span> wc -c
+     <span class="m">255</span>
+     
+<span class="nb">echo</span> -n <span class="s2">&#34;</span><span class="si">${</span><span class="nv">lorem_ipsum</span><span class="si">}</span><span class="s2">&#34;</span> <span class="p">|</span> cut -b <span class="s2">&#34;</span><span class="si">${</span><span class="nv">offset</span><span class="p">-</span><span class="nv">$max_bytes</span><span class="si">}</span><span class="s2">&#34;</span>
+Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry<span class="s1">&#39;s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has su
+</span><span class="s1">
+</span><span class="s1">offset=$((max_bytes+1))
+</span><span class="s1">max_bytes=$(( $max_bytes+255 ))
+</span><span class="s1">
+</span><span class="s1"># Get next 255 bytes
+</span><span class="s1">echo -n &#34;${lorem_ipsum}&#34; | cut -b &#34;${offset}&#34;-&#34;${max_bytes}&#34; |  tr -d $&#39;</span><span class="se">\n</span><span class="err">&#39;</span> <span class="p">|</span> wc -c
+     <span class="m">255</span>
+     
+<span class="nb">echo</span> -n <span class="s2">&#34;</span><span class="si">${</span><span class="nv">lorem_ipsum</span><span class="si">}</span><span class="s2">&#34;</span> <span class="p">|</span> cut -b <span class="s2">&#34;</span><span class="si">${</span><span class="nv">offset</span><span class="si">}</span><span class="s2">&#34;</span>-<span class="s2">&#34;</span><span class="si">${</span><span class="nv">max_bytes</span><span class="si">}</span><span class="s2">&#34;</span>
+rvived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing
+
+</code></pre></div><p>and make multiple TXT records to get data across, but we need to make the most of what we have.</p>
+<h1 id="compression">Compression</h1>
+<p>Using <code>python3</code>, <code>base64</code>, and <code>zlib</code>, we can compress the data then <code>bas64</code> encode it</p>
+<div class="highlight"><pre class="chroma"><code class="language-python" data-lang="python"><span class="o">&gt;&gt;&gt;</span> <span class="n">lorem_ipsum</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&#34;Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry&#39;s standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions&#34;</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lorem_ipsum</span><span class="p">)</span>
+<span class="mi">558</span> 
+<span class="o">&gt;&gt;&gt;</span> <span class="kn">import</span> <span class="nn">base64</span><span class="o">,</span> <span class="nn">zlib</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">lorem_ipsum_compressed</span> <span class="o">=</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64encode</span><span class="p">(</span><span class="n">zlib</span><span class="o">.</span><span class="n">compress</span><span class="p">(</span><span class="n">lorem_ipsum</span><span class="p">,</span><span class="mi">9</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">lorem_ipsum_compressed</span><span class="p">)</span>
+<span class="mi">440</span>
+</code></pre></div><p>A reduction of <code>118</code> characters, not bad.</p>
+<h1 id="proof-of-concept">Proof of concept</h1>
+<p>I created a TXT record on <code>message.theden.sh</code> with the <code>zlib</code> + <code>base64</code> method above</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">dig message.theden.sh TXT +short
+<span class="s2">&#34;eNrzTFOozC9VL0pVKEpNTMnMS1coycgsVsgsUS9WKMnPV8hJLElVBAD3QAzt&#34;</span>
+</code></pre></div><p>and to decompress it in one line</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">dig message.theden.sh TXT +short  <span class="p">|</span> python -c <span class="s2">&#34;import sys, zlib, base64; print(zlib.decompress(base64.b64decode(sys.stdin.readlines()[0])))&#34;</span>
+If you<span class="s1">&#39;re reading this it&#39;</span>s too late!
+</code></pre></div><p>So it works as expected. Now we need an interesting use-case.</p>
+<h1 id="dns-as-a-password-manager">DNS as a password manager?</h1>
+<p>It feels wrong, but here it goes. Let&rsquo;s encrypt a secret with a password</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># encrypt secret</span>
+<span class="nb">echo</span> -n <span class="s1">&#39;mySuperSecretPassword1!!1!!&#39;</span> <span class="p">|</span> openssl enc -e -aes-256-cbc -a -salt -pbkdf2
+enter aes-256-cbc encryption password:
+Verifying - enter aes-256-cbc encryption password:
+U2FsdGVkX1/6QtzsEgPSLYdsSmIeVdH/0t7Tcwfr7ixWyDGzHu/Saz8YrKQ84kGd
+</code></pre></div><p>I stored the encrypted secret on the TXT record under <code>pass.theden.sh</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">dig pass.theden.sh TXT +short <span class="p">|</span> sed <span class="s1">&#39;s/^&#34;\(.*\)&#34;$/\1/&#39;</span> <span class="p">|</span> openssl aes-256-cbc -a -d -salt -pbkdf2
+enter aes-256-cbc decryption password:
+mySuperSecretPassword1!!1!!
+</code></pre></div><p>You can try it yourself, the password to decrypt is <code>hackerman</code>.</p>
+<h1 id="some-thoughts-and-ideas">Some Thoughts and Ideas</h1>
+<ul>
+<li>Encrypted passwords can be stored per domain, e.g., <code>gmail.theden.sh</code>, <code>apple.theden.sh</code>, and a distributed for you via propagation, in a decentralised manner, on a standard protocol without vendor lock-in, portability, and not having to worry about a password management service getting hacked. Down side: I guess you really have to believe that that a bad actor can&rsquo;t decrypt it. And you have to pay for domain name.</li>
+<li>With only four TXT recrods that&rsquo;s ~1KB of compressed data. Some <a href="https://github.com/in4k">demoscene intros</a> can be stored in TXT records.</li>
+<li>You could theoretically store an arbitrary amount of data, if there is no limit on the number of TXT records you can create. I haven&rsquo;t tried this, but would like to know what the limit is.</li>
+<li>More registrars need to have APIs for updating records. With an API, one could programatically update TXT records.</li>
+</ul>
+</article>
+
+        </main><footer id="footer">
+    
+</footer>
+</body>
+</html>

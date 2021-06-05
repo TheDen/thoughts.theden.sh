@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="thoughts.theden.sh — Denis Khoshaba">
+    
+    <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
+    
+    <link rel="stylesheet" href="/css/style.min.css">
+
+    <title>Building a Local Linux Development Environment with Docker and Make</title>
+</head>
+<body><header id="banner">
+    <h2><a href="https://thoughts.theden.sh/">thoughts</a></h2>
+    <nav>
+        <ul>
+            <li>
+                <a href="/" title="posts">posts</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>Building a Local Linux Development Environment with Docker and Make</h1>
+            <div>
+                <time>May 26, 2018</time>
+                </div>
+    </header><p>Often I&rsquo;m on a MacBook Pro and need a sandboxed local linux environment that&rsquo;s fast. Before, I&rsquo;d rely on <a href="https://www.vagrantup.com/">Vagrant</a>—often running <code>vagrant up &amp;&amp; vagrant ssh</code>, but in my experience it was often too slow and flaky for me.</p>
+<p>Last year I switched <code>vagrant</code> with <code>docker</code> for my local linux environment and it&rsquo;s worked pretty well insofar as productivity goes. So much that I&rsquo;ve managed to write a <a href="https://github.com/TheDen/netmon">linux network monitor</a> using this setup. In this post, we&rsquo;ll recreate the setup by building a <code>Dockerfile</code> and a <code>Makefile</code> and see how they can work together for what I think is an elegant workflow.</p>
+<h2 id="dockerfile">Dockerfile</h2>
+<p>Let&rsquo;s start building our <code>Dockerfile</code> line by line.</p>
+<h3 id="parent-imagehttpsdocsdockercomglossarytermparent20image"><a href="https://docs.docker.com/glossary/?term=parent%20image">Parent Image</a></h3>
+<p>We&rsquo;ll use <code>ubuntu:16.04</code> from the <a href="https://hub.docker.com/_/ubuntu/">official Canonical repo</a></p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">FROM</span><span class="s"> ubuntu:16.04</span><span class="err">
+</span></code></pre></div><h3 id="using-runhttpsdocsdockercomenginereferencebuilderrun-for-our-base-packages">Using <a href="https://docs.docker.com/engine/reference/builder/#run">RUN</a> for our base packages</h3>
+<p>When building the Ubuntu image, we want run <code>apt-get update</code> and <code>upgrade</code> to ensure the packages are up to date.</p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">RUN</span> apt-get update <span class="o">&amp;&amp;</span> apt-get -y upgrade<span class="err">
+</span></code></pre></div><p>We might as well chain the commands with <code>&amp;&amp;</code> to install any additional base packages we would need for our environment</p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">RUN</span> apt-get update <span class="o">&amp;&amp;</span> apt-get -y upgrade <span class="se">\
+</span><span class="se"></span> bash-completion <span class="se">\
+</span><span class="se"></span> build-essential <span class="se">\
+</span><span class="se"></span> curl <span class="se">\
+</span><span class="se"></span> git <span class="se">\
+</span><span class="se"></span> git-core <span class="se">\
+</span><span class="se"></span> golang <span class="se">\
+</span><span class="se"></span> htop <span class="se">\
+</span><span class="se"></span> locales <span class="se">\
+</span><span class="se"></span> man <span class="se">\
+</span><span class="se"></span> nmap <span class="se">\
+</span><span class="se"></span> python3-pip <span class="se">\
+</span><span class="se"></span> ruby-full <span class="se">\
+</span><span class="se"></span> strace <span class="se">\
+</span><span class="se"></span> sudo <span class="se">\
+</span><span class="se"></span> tig <span class="se">\
+</span><span class="se"></span> vim <span class="se">\
+</span><span class="se"></span> wget<span class="err">
+</span></code></pre></div><p>Note the usage of <code>\</code> so we can have linebreaks for each package. This is useful for when you want to add or remove packages.</p>
+<h3 id="locales">Locales</h3>
+<p>You may have noticed we installed the <code>locale</code> package. This lets us run the <code>locale-gen</code> command that we can use to generate localisation files from templates. Let&rsquo;s say we want to add <code>en_US.UTF-8</code> as an available locale</p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">RUN</span> locale-gen en_US.UTF-8<span class="err">
+</span></code></pre></div><p>The full list is in <code>/etc/locale.gen</code>. During runtime the <code>LANG</code> environment variable can be used to set a locale that&rsquo;s needed.</p>
+<h3 id="configuring-sudo-and-disabling-root-as-default">Configuring sudo and disabling root as default</h3>
+<p>Let&rsquo;s add the default user <code>ubuntu</code> and enable <code>sudo</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="c"># Disable password and not ask for finger info</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> adduser --disabled-password --gecos <span class="s1">&#39;&#39;</span> ubuntu<span class="err">
+</span><span class="err"></span><span class="k">RUN</span> adduser ubuntu sudo<span class="err">
+</span><span class="err"></span><span class="k">RUN</span> <span class="nb">echo</span> <span class="s1">&#39;%sudo ALL=(ALL) NOPASSWD:ALL&#39;</span> &gt;&gt; /etc/sudoers<span class="err">
+</span></code></pre></div><p>Breaking it down:</p>
+<ul>
+<li><code>--disabled-password</code> ensures <code>passwd</code> is not run to set the password, but still allows for login (unlike <code>--disabled-login</code>).</li>
+<li><code>--gecos</code> sets the <code>finger</code> information (<a href="https://en.wikipedia.org/wiki/Gecos_field">Gecos field</a>), such as the user&rsquo;s name, number etc. —we&rsquo;ll set it to be blank.</li>
+<li><code>adduser ubuntu sudo</code> adds <code>ubuntu</code> to the <code>sudo</code> group</li>
+<li><code>%sudo ALL=(ALL) NOPASSWD:ALL</code> in the <code>/etc/sudors</code> enables <code>NOPASSWD</code> for the <code>sudo</code> group, so users can run <code>sudo</code> without a password prompt</li>
+</ul>
+<h3 id="setting-ubuntu-as-the-entry-userhttpsdocsdockercomenginereferencebuilderuser">Setting ubuntu as the entry <a href="https://docs.docker.com/engine/reference/builder/#user">USER</a></h3>
+<p>Since we don&rsquo;t want the image to default to <code>root</code>, and the operations from now won&rsquo;t require root, we&rsquo;ll set the user to ubuntu</p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">USER</span><span class="s"> ubuntu</span><span class="err">
+</span></code></pre></div><h3 id="hiding-login-banner-messages">Hiding login banner messages</h3>
+<p>If you don&rsquo;t want to see the default banner messages whenever you run a container interactively, we can create a <code>.hushlogin</code> file which will hide the <code>motd</code> (<em>message of the day</em>) or anything that&rsquo;s stored in <code>/etc/bash.bashrc</code></p>
+<pre><code># Hush login messages
+RUN touch ~/.hushlogin
+</code></pre><p>In this container, it hides the default <code>sudo</code> message—if you&rsquo;re curious how it works, here&rsquo;s the code block that checks for <code>.hushlogin</code> by default in <code>/etc/bash.bashrc</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># sudo hint</span>
+<span class="k">if</span> <span class="o">[</span> ! -e <span class="s2">&#34;</span><span class="nv">$HOME</span><span class="s2">/.sudo_as_admin_successful&#34;</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="o">[</span> ! -e <span class="s2">&#34;</span><span class="nv">$HOME</span><span class="s2">/.hushlogin&#34;</span> <span class="o">]</span> <span class="p">;</span> <span class="k">then</span>
+    <span class="k">case</span> <span class="s2">&#34; </span><span class="k">$(</span>groups<span class="k">)</span><span class="s2"> &#34;</span> in *<span class="se">\ </span>admin<span class="se">\ </span>*<span class="p">|</span>*<span class="se">\ </span>sudo<span class="se">\ </span>*<span class="o">)</span>
+    <span class="k">if</span> <span class="o">[</span> -x /usr/bin/sudo <span class="o">]</span><span class="p">;</span> <span class="k">then</span>
+  cat <span class="s">&lt;&lt;-EOF
+</span><span class="s">  To run a command as administrator (user &#34;root&#34;), use &#34;sudo &lt;command&gt;&#34;.
+</span><span class="s">  See &#34;man sudo_root&#34; for details.
+</span><span class="s">
+</span><span class="s">  EOF</span>
+    <span class="k">fi</span>
+    <span class="k">esac</span>
+<span class="k">fi</span>
+</code></pre></div><h3 id="setting-the-workdirhttpsdocsdockercomenginereferencebuilderworkdir">Setting the <a href="https://docs.docker.com/engine/reference/builder/#workdir">WORKDIR</a></h3>
+<p>From the docs</p>
+<blockquote>
+<p>The <code>WORKDIR</code> instruction sets the working directory for any <code>RUN</code>, <code>CMD</code>, <code>ENTRYPOINT</code>, <code>COPY</code> and <code>ADD</code> instructions that follow it in the <code>Dockerfile</code></p>
+</blockquote>
+<p>In our case, we&rsquo;ll set it to <code>/home/ubuntu</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">WORKDIR</span><span class="s"> /home/ubuntu</span><span class="err">
+</span></code></pre></div><p>With all that, our basic <code>Dockerfile</code> is ready</p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">FROM</span><span class="s"> ubuntu:16.04</span><span class="err">
+</span><span class="err"></span>	<span class="err">
+</span><span class="err"></span><span class="k">RUN</span> apt-get update <span class="o">&amp;&amp;</span> apt-get -y upgrade <span class="se">\
+</span><span class="se"></span> bash-completion <span class="se">\
+</span><span class="se"></span> build-essential <span class="se">\
+</span><span class="se"></span> curl <span class="se">\
+</span><span class="se"></span> git <span class="se">\
+</span><span class="se"></span> git-core <span class="se">\
+</span><span class="se"></span> golang <span class="se">\
+</span><span class="se"></span> htop <span class="se">\
+</span><span class="se"></span> locales <span class="se">\
+</span><span class="se"></span> man <span class="se">\
+</span><span class="se"></span> nmap <span class="se">\
+</span><span class="se"></span> python3-pip <span class="se">\
+</span><span class="se"></span> ruby-full <span class="se">\
+</span><span class="se"></span> strace <span class="se">\
+</span><span class="se"></span> sudo <span class="se">\
+</span><span class="se"></span> tig <span class="se">\
+</span><span class="se"></span> vim <span class="se">\
+</span><span class="se"></span> wget<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> locale-gen en_US.UTF-8<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c"># Disable password and not ask for finger info</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> adduser --disabled-password --gecos <span class="s1">&#39;&#39;</span> ubuntu<span class="err">
+</span><span class="err"></span><span class="k">RUN</span> adduser ubuntu sudo<span class="err">
+</span><span class="err"></span><span class="k">RUN</span> <span class="nb">echo</span> <span class="s1">&#39;%sudo ALL=(ALL) NOPASSWD:ALL&#39;</span> &gt;&gt; /etc/sudoers<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="k">USER</span><span class="s"> ubuntu</span><span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c"># Hush login messages</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> touch ~/.hushlogin<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> /home/ubuntu</span><span class="err">
+</span></code></pre></div><p>We can build it by running this command in the same directory</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ docker build -t &lt;image-name&gt; .
+</code></pre></div><p>and to get an interactive shell in a container</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ docker run -it &lt;image-name&gt; bash
+</code></pre></div><p>But this would be cumbersome to type every time, so we&rsquo;ll write a logical <code>Makefile</code> to help things easier.</p>
+<h2 id="making-a-makefile">Making a Makefile</h2>
+<p>Let&rsquo;s go line by line for our <code>Makefile</code>, not unlike what we did for the <code>Dockerfile</code>. First we&rsquo;ll create a file called <code>Makefile</code> in the same director as the <code>Dockerfile</code>, and add these variables in the header</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nv">IMAGE</span><span class="o">?=</span><span class="s2">&#34;docker-dev-env&#34;</span>
+<span class="nv">COMMITIMAGE</span><span class="o">=</span><span class="s2">&#34;docker-dev-env-commited&#34;</span>
+<span class="nv">MOUNTDIR</span><span class="o">?=</span><span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
+</code></pre></div><ul>
+<li><code>IMAGE</code> will be our image name</li>
+<li><code>COMMITIMAGE</code> is our image name when we run <code>docker commit</code> (we&rsquo;ll discuss this later)</li>
+<li><code>MOUNTDIR</code> is the variable we&rsquo;ll use to mount our local filesystem paths inside the container for development</li>
+</ul>
+<p>The <code>?=</code> operator means that if no value is given for the variable, it will default to what is set—so for example with <code>MOUNTDIR</code>, it will default to the current working directory by invoking <code>$(shell pwd)</code>.</p>
+<h3 id="build-targets">Build Targets</h3>
+<p>Lets' write the <code>build</code> target</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">build</span><span class="o">:</span>
+  docker build --rm -t <span class="k">$(</span>IMAGE<span class="k">)</span> .
+</code></pre></div><p>The <code>IMAGE</code> variable is passed in the command. The <code>--rm</code> flag ensures that docker removes intermediate containers after a successful build.</p>
+<h3 id="run-targets">Run targets</h3>
+<p>For our basic <code>run</code> target</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">run</span><span class="o">:</span>
+  docker run -it -P <span class="k">$(</span>IMAGE<span class="k">)</span> bash
+</code></pre></div><p>It will run the container with a <code>bash</code> interactive shell. The <code>-P</code> flag ensures the container will publish all exposed ports to the host interfaces (useful for when you&rsquo;re testing a web service locally).</p>
+<p>Let&rsquo;s make a few more run commands for certain use-cases.</p>
+<h4 id="allowing-strace">Allowing strace</h4>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">run-with-strace</span><span class="o">:</span>
+    docker run -it -P --cap-add SYS_PTRACE <span class="k">$(</span>IMAGE<span class="k">)</span> bash
+</code></pre></div><p>Allows <code>strace</code> to be used within the container—a tool I often like to use. the <code>--cap-add</code> flag allows you to add linux capabilities to the container. You can see the full list of capabilities you can add or remove by checking the manpage (<code>man capabilities</code>).</p>
+<h4 id="mounting-directories">Mounting directories</h4>
+<p>Let&rsquo;s say you want to mount your project&rsquo;s directory in the container so you can work on it. We can utilise the <code>MOUNTDIR</code> variable we set in the header</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">run-mount</span><span class="o">:</span>
+  docker run -it -P -v <span class="k">$(</span>MOUNTDIR<span class="k">)</span>:/<span class="nv">$$</span><span class="o">(</span>basename <span class="k">$(</span>MOUNTDIR<span class="k">)</span><span class="o">)</span> <span class="k">$(</span>IMAGE<span class="k">)</span> bash
+</code></pre></div><ul>
+<li><code>$</code> characters need to be escaped with <code>$$</code>.</li>
+<li>the <code>-v</code> is short for <code>--volume=[host-src:]container-dest]</code>. Note that the <code>host-src</code> path needs to be absolute.</li>
+</ul>
+<p>An example run would be</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ make run-mount <span class="nv">MOUNTDIR</span><span class="o">=</span>/Users/den/
+docker run -it -P -v /Users/den/:/<span class="k">$(</span>basename /Users/den/<span class="k">)</span> <span class="s2">&#34;docker-dev-env&#34;</span> bash
+ubuntu@4a930810e1f4:~$ file /den/
+/den/: directory
+</code></pre></div><h3 id="docker-exec">docker exec</h3>
+<p>Let&rsquo;s say you have a container running with an interactive shell, and you want another shell login on the same container. Normally you&rsquo;d need to run <code>docker ps</code> to see what the container ID is, then run <code>docker exec -it &lt;container-id&gt; bash</code> to get another prompt. We can automate that with make</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">exec</span><span class="o">:</span>
+  <span class="k">$(</span><span class="nb">eval</span> CONTAINER :<span class="o">=</span> <span class="k">$(</span>shell docker ps -f <span class="s2">&#34;ancestor=</span><span class="k">$(</span>IMAGE<span class="k">)</span><span class="s2">&#34;</span> -f <span class="s2">&#34;status=running&#34;</span> -q<span class="k">))</span>
+  docker <span class="nb">exec</span> -it <span class="k">$(</span>CONTAINER<span class="k">)</span> bash
+</code></pre></div><p>The first line sets the variable <code>CONTAINER</code> to the ID of the running container that matches the image name it&rsquo;s descendant from. The second line gives the user another shell prompt to the running container.</p>
+<h3 id="killing">Killing</h3>
+<p>If we want to kill all running containers we can do something similar to what we did for the <code>exec</code> target</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">kill</span><span class="o">:</span>
+    docker ps -f <span class="s2">&#34;ancestor=</span><span class="k">$(</span>IMAGE<span class="k">)</span><span class="s2">&#34;</span> -f <span class="s2">&#34;status=running&#34;</span> -q <span class="p">|</span> xargs docker <span class="nb">kill</span>
+</code></pre></div><p>This will grab all the running container IDs based on the image ancestor, and pipe them to <code>xargs</code> with <code>docker kill</code>.</p>
+<h3 id="committing">Committing</h3>
+<p>Though I treat my docker development environments as ephemeral, relying on mounts from my host for stored data, sometimes I may need to maintain the state of the container—<code>docker commit</code> allows an image to be saved as-is. We can write a make target for this</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">commit</span><span class="o">:</span>
+  <span class="k">$(</span><span class="nb">eval</span> CONTAINER :<span class="o">=</span> <span class="k">$(</span>shell docker ps -f <span class="s2">&#34;ancestor=</span><span class="k">$(</span>IMAGE<span class="k">)</span><span class="s2">&#34;</span> -f <span class="s2">&#34;status=running&#34;</span> -q<span class="k">))</span>
+  docker commit <span class="k">$(</span>CONTAINER<span class="k">)</span> <span class="k">$(</span>COMMITIMAGE<span class="k">)</span>
+</code></pre></div><p>As before, we grab the container ID then run <code>docker commit</code> with the <code>COMMITIMAGE</code> being the variable we&rsquo;ve set from the header.</p>
+<p>Now putting it all together, here&rsquo;s the <code>Makefile</code> we&rsquo;ve built so far</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nv">IMAGE</span><span class="o">?=</span><span class="s2">&#34;docker-dev-env&#34;</span>
+<span class="nv">COMMITIMAGE</span><span class="o">=</span><span class="s2">&#34;docker-dev-env-commited&#34;</span>
+<span class="nv">MOUNTDIR</span><span class="o">?=</span><span class="k">$(</span>shell <span class="nb">pwd</span><span class="k">)</span>
+
+<span class="nf">build</span><span class="o">:</span>
+  docker build --rm -t <span class="k">$(</span>IMAGE<span class="k">)</span> .
+
+<span class="nf">run</span><span class="o">:</span>
+  docker run -it -P <span class="k">$(</span>IMAGE<span class="k">)</span> bash
+
+<span class="nf">run-with-strace</span><span class="o">:</span>
+  docker run -it -P --cap-add SYS_PTRACE <span class="k">$(</span>IMAGE<span class="k">)</span> bash
+
+<span class="nf">run-mount</span><span class="o">:</span>
+  docker run -it -P -v <span class="k">$(</span>MOUNTDIR<span class="k">)</span>:/<span class="nv">$$</span><span class="o">(</span>basename <span class="k">$(</span>MOUNTDIR<span class="k">)</span><span class="o">)</span> <span class="k">$(</span>IMAGE<span class="k">)</span> bash
+
+<span class="nf">exec</span><span class="o">:</span>
+  <span class="k">$(</span><span class="nb">eval</span> CONTAINER :<span class="o">=</span> <span class="k">$(</span>shell docker ps -f <span class="s2">&#34;ancestor=</span><span class="k">$(</span>IMAGE<span class="k">)</span><span class="s2">&#34;</span> -f <span class="s2">&#34;status=running&#34;</span> -q<span class="k">))</span>
+  docker <span class="nb">exec</span> -it <span class="k">$(</span>CONTAINER<span class="k">)</span> bash
+
+<span class="nf">kill</span><span class="o">:</span>
+    docker ps -f <span class="s2">&#34;ancestor=</span><span class="k">$(</span>IMAGE<span class="k">)</span><span class="s2">&#34;</span> -f <span class="s2">&#34;status=running&#34;</span> -q <span class="p">|</span> xargs docker <span class="nb">kill</span>
+
+<span class="nf">commit</span><span class="o">:</span>
+  <span class="k">$(</span><span class="nb">eval</span> CONTAINER :<span class="o">=</span> <span class="k">$(</span>shell docker ps -f <span class="s2">&#34;ancestor=</span><span class="k">$(</span>IMAGE<span class="k">)</span><span class="s2">&#34;</span> -f <span class="s2">&#34;status=running&#34;</span> -q<span class="k">))</span>
+  docker commit <span class="k">$(</span>CONTAINER<span class="k">)</span> <span class="k">$(</span>COMMITIMAGE<span class="k">)</span>
+</code></pre></div><p>You can also alias the <code>Makefile</code> such that it can be run from any directory, for example</p>
+<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ <span class="nb">alias</span> docker-dev<span class="o">=</span><span class="s1">&#39;make -f ~/repo/docker-dev-env/Makefile&#39;</span>
+$ docker-dev run-mount
+docker run -it -P -v /Users/den:/<span class="k">$(</span>basename /Users/den<span class="k">)</span> <span class="s2">&#34;docker-dev-env&#34;</span> bash
+</code></pre></div><p>It would be useful to place the alias in your <code>.bashrc</code> file.</p>
+<h2 id="bonus">Bonus</h2>
+<p>I&rsquo;ll use one more example of adding a personal <code>.vimrc</code> to the image during build time.</p>
+<p>Say we want to pull a <code>.vimrc</code> file from a GitHub repo and have available in the docker image. To do that we&rsquo;ll first add the file&rsquo;s URL as a variable in the <code>Makefile</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nv">VIMRC</span><span class="o">?=</span><span class="s2">&#34;https://raw.githubusercontent.com/TheDen/dotfiles/master/.vimrc&#34;</span>
+</code></pre></div><p>This makes the specific <code>.vimrc</code> default, but it can always be changed when running <code>make</code> from the command line. Now let&rsquo;s pass the variable to the <code>Dockerfile</code>—we&rsquo;ll update the <code>build</code> target</p>
+<div class="highlight"><pre class="chroma"><code class="language-Makefile" data-lang="Makefile"><span class="nf">build</span><span class="o">:</span>
+  docker build --rm --build-arg <span class="nv">VIMRC</span><span class="o">=</span><span class="k">$(</span>VIMRC<span class="k">)</span> -t <span class="k">$(</span>IMAGE<span class="k">)</span> .
+</code></pre></div><p>The <code>--build-arg</code> flag passes the <code>VIMRC</code> argument to the Dockerfile so the URL can be used. Now we just need to update the Dockerfile to pull the <code>.vimrc</code> (and install <a href="https://github.com/VundleVim/Vundle.vim">Vundle</a> since my specific <code>.vimrc</code> uses packages)</p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">USER</span><span class="s"> ubuntu</span><span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c"># Install vundle</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="c"># Pull down .vimrc if a URL is passed</span><span class="err">
+</span><span class="err"></span><span class="k">ARG</span> VIMRC<span class="err">
+</span><span class="err"></span><span class="k">RUN</span> <span class="nb">test</span> <span class="s2">&#34;</span><span class="nv">$VIMRC</span><span class="s2">&#34;</span> <span class="o">&amp;&amp;</span> curl -sL <span class="nv">$VIMRC</span> -o ~/.vimrc <span class="o">||</span> :<span class="err">
+</span></code></pre></div><p>Not that this is done after <code>USER ubuntu</code> since we don&rsquo;t need to be <code>root</code> anymore.</p>
+<h1 id="conclusion">Conclusion</h1>
+<p>What we&rsquo;ve built here is a basic workflow for running containers for development with high velocity. Depending on your use-case, you can build your development environment with any configuration between your <code>Dockerfile</code> and <code>Makefile</code>. You can see what my current setup is <a href="https://github.com/theden/docker-dev-env">on GitHub</a>.</p>
+</article>
+
+        </main><footer id="footer">
+    
+</footer>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="thoughts.theden.sh — Denis Khoshaba">
+    
+    <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
+    
+    <link rel="stylesheet" href="/css/style.min.css">
+
+    <title>Running Linux games on MacOS with Docker</title>
+</head>
+<body><header id="banner">
+    <h2><a href="https://thoughts.theden.sh/">thoughts</a></h2>
+    <nav>
+        <ul>
+            <li>
+                <a href="/" title="posts">posts</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main id="content">
+<article>
+    <header id="post-header">
+        <h1>Running Linux games on MacOS with Docker</h1>
+            <div>
+                <time>July 21, 2018</time>
+                </div>
+    </header><p><img src="/linux-games/example.gif" alt="gnome-mahjongg on MacOS"></p>
+<h2 id="setting-up-x">Setting up X</h2>
+<p>Install <a href="https://www.xquartz.org/">XQuartz</a> (X.Org X Window System that runs on MacOS)</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">brew cask install xquartz
+</code></pre></div><p>Then in the XQuartz preferences, under the <code>security</code> tab, check the <code>allow connections from network clients</code> button</p>
+<p><img src="/linux-games/xquartz.png" alt=""></p>
+<h2 id="quickstart-tldr">Quickstart (tldr)</h2>
+<p>Given XQuartz is set up</p>
+<p>Find your IP address and allow access to the X server (assuming <code>en0</code> is your network device)</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">export</span> <span class="nv">localIP</span><span class="o">=</span><span class="k">$(</span>ipconfig getifaddr en0<span class="k">)</span>
+xhost + <span class="nv">$localIP</span> 
+</code></pre></div><p>pull the container</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">docker pull theden/linux-games
+</code></pre></div><p>run it with the following environment variables (passing in your <code>localIP</code> to <code>DISPLAY</code>)</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">docker run --hostname linux-games --user ubuntu -it -e <span class="nv">DISPLAY</span><span class="o">=</span><span class="nv">$localIP</span>:0 -e <span class="nv">XAUTHORITY</span><span class="o">=</span>~/.Xauthority -v /tmp/.X11-unix:/tmp/.X11-unix -v ~/.Xauthority:/.Xauthority theden/linux-games
+</code></pre></div><p>Now that&rsquo;s fun, but let&rsquo;s go through how the <code>Dockerfile</code> was built, and add a generic script that would ensure it would run on any MacBook.</p>
+<h2 id="building-the-dockerfile">Building the Dockerfile</h2>
+<p>Using <a href="https://hub.docker.com/_/ubuntu/">ubuntu</a> as the base image. Let&rsquo;s work out the <code>RUN</code> commands we&rsquo;ll need.</p>
+<h3 id="base-software">Base software</h3>
+<p>Let&rsquo;s install the packages required, <code>xauth</code>, <code>xorg</code>, and <code>sudo</code> since we want your non-root user to be able to escalate to root.</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">apt-get install -y --no-install-recommends sudo xauth xorg
+</code></pre></div><p>For the games, we&rsquo;ll install <code>gnome-games</code> and the <code>KDE</code> games. the <code>kdegames</code> package doesn&rsquo;t exist anymore, so we&rsquo;ll individually install all the known packages.</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">apt-get install -y --no-install-recommends gnome-games bomber bovo granatier kajongg kapman katomic kblackbox kblocks kbounce kbreakout kdiamond kfourinline kgoldrunner kigo killbots kiriki kjumpingcube klickety klines kmahjongg
+kmines knavalbattle knetwalk kolf kollision konquest kpat kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick lskat palapeli picmi
+</code></pre></div><h3 id="user-configuration">User configuration</h3>
+<p>We&rsquo;ll create the user <code>ubuntu</code> with <code>sudo</code> privledges</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">adduser --disabled-password --gecos <span class="s1">&#39;&#39;</span> ubuntu
+adduser ubuntu sudo
+<span class="nb">echo</span> <span class="s1">&#39;%sudo ALL=(ALL) NOPASSWD:ALL&#39;</span> &gt;&gt; /etc/sudoers
+</code></pre></div><p>Then set it as default with its home as the <code>WORKDIR</code>, add the <code>/usr/games</code> to <code>PATH</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">USER</span><span class="s"> ubuntu</span><span class="err">
+</span><span class="err"></span><span class="k">ENV</span> PATH <span class="nv">$PATH</span>:/usr/games/<span class="err">
+</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> /home/ubuntu</span><span class="err">
+</span></code></pre></div><h3 id="game-list">Game list</h3>
+<p>I&rsquo;d like the user to have a list of games avaiable with a description for each one. A trick is to use <code>apt-cache search ^packagename$</code> to get the description, e.g.,</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">apt-cache search ^ksudoku$
+ksudoku - Sudoku puzzle game and solver
+</code></pre></div><p>What we can do is run this against all the games in the <code>/usr/games</code> directory and redirect it to a file <code>gamelist</code> that we can output when the container is run. Using some <code>xargs</code> magic, we can speed it up during the build</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">ls -A /usr/games <span class="p">|</span> xargs -n <span class="m">1</span> -I <span class="o">{}</span> -P <span class="k">$(</span>nproc<span class="k">)</span> sh -c <span class="s2">&#34;apt-cache search ^{}</span>$<span class="s2">&#34;</span> &gt; <span class="si">${</span><span class="nv">HOME</span><span class="si">}</span>/gamelist
+</code></pre></div><p>where the <code>-P</code> flag is for Parallel mode and <code>nproc</code> will print the number of processing units available to the current process, so we can parallelise the process as much as possible.</p>
+<h3 id="entrypoint">Entrypoint</h3>
+<p>We&rsquo;ll set the entrypoint to be a script</p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">ENTRYPOINT</span> <span class="p">[</span><span class="s2">&#34;./start.sh&#34;</span><span class="p">]</span><span class="err">
+</span></code></pre></div><p>where it will print the list of games, cd in <code>/user/games</code>, and <code>exec</code> whatever command is passed to the container</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="cp">#!/bin/bash
+</span><span class="cp"></span>
+cat gamelist
+<span class="nb">cd</span> /usr/games/
+
+<span class="nb">exec</span> <span class="nv">$@</span>
+</code></pre></div><h3 id="putting-it-all-together">Putting it all together</h3>
+<p>Optimising for layers and image size we now have our <code>Dockerfile</code></p>
+<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">FROM</span><span class="s"> ubuntu:16.04</span><span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="k">RUN</span> apt-get -y update <span class="se">\
+</span><span class="se"></span>      <span class="o">&amp;&amp;</span> apt-get install -y --no-install-recommends sudo xauth xorg <span class="se">\
+</span><span class="se"></span>      <span class="o">&amp;&amp;</span> apt-get install -y --no-install-recommends gnome-games bomber bovo granatier kajongg kapman katomic kblackbox kblocks kbounce kbreakout kdiamond kfourinline kgoldrunner kigo killbots kiriki kjumpingcube klickety klines kmahjongg kmines knavalbattle knetwalk kolf kollision konquest kpat kreversi kshisen ksirk ksnakeduel kspaceduel ksquares ksudoku ktuberling kubrick lskat palapeli picmi <span class="se">\
+</span><span class="se"></span>      <span class="o">&amp;&amp;</span> adduser --disabled-password --gecos <span class="s1">&#39;&#39;</span> ubuntu <span class="se">\
+</span><span class="se"></span>      <span class="o">&amp;&amp;</span> adduser ubuntu sudo <span class="se">\
+</span><span class="se"></span>      <span class="o">&amp;&amp;</span> <span class="nb">echo</span> <span class="s1">&#39;%sudo ALL=(ALL) NOPASSWD:ALL&#39;</span> &gt;&gt; /etc/sudoers <span class="se">\
+</span><span class="se"></span>      <span class="o">&amp;&amp;</span> rm -rf /var/lib/apt/lists/*<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="k">USER</span><span class="s"> ubuntu</span><span class="err">
+</span><span class="err"></span><span class="k">ENV</span> PATH <span class="nv">$PATH</span>:/usr/games/<span class="err">
+</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> /home/ubuntu</span><span class="err">
+</span><span class="err"></span><span class="k">COPY</span> --chown<span class="o">=</span>ubuntu start.sh /home/ubuntu<span class="err">
+</span><span class="err"></span><span class="k">RUN</span> ls -A /usr/games <span class="p">|</span> xargs -n <span class="m">1</span> -I <span class="o">{}</span> -P <span class="k">$(</span>nproc<span class="k">)</span> sh -c <span class="s2">&#34;apt-cache search ^{}</span>$<span class="s2">&#34;</span> &gt; <span class="si">${</span><span class="nv">HOME</span><span class="si">}</span>/gamelist <span class="se">\
+</span><span class="se"></span>      <span class="o">&amp;&amp;</span> touch ~/.hushlogin <span class="se">\
+</span><span class="se"></span>      <span class="o">&amp;&amp;</span> chmod a+x <span class="nv">$HOME</span>/start.sh<span class="err">
+</span><span class="err">
+</span><span class="err"></span><span class="k">ENTRYPOINT</span> <span class="p">[</span><span class="s2">&#34;./start.sh&#34;</span><span class="p">]</span><span class="err">
+</span></code></pre></div><h2 id="running-the-container">Running the container</h2>
+<p>I wrote a script that finds the MacBook&rsquo;s active network device and the local IP, gives it access to the X server, and runs the container</p>
+<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="cp">#!/bin/bash
+</span><span class="cp"></span>
+<span class="nv">IMAGENAME</span><span class="o">=</span>theden/linux-games
+
+getip<span class="o">()</span> <span class="o">{</span>
+  <span class="nv">localIP</span><span class="o">=</span><span class="k">$(</span>ipconfig getifaddr en0<span class="k">)</span>
+
+  <span class="k">if</span> <span class="o">[</span> -z <span class="s2">&#34;</span><span class="nv">$localIP</span><span class="s2">&#34;</span> <span class="o">]</span> <span class="p">;</span> <span class="k">then</span>
+    <span class="nv">localIP</span><span class="o">=</span><span class="k">$(</span>ipconfig getifaddr en1<span class="k">)</span>
+  <span class="k">else</span>
+    <span class="k">return</span>
+  <span class="k">fi</span>
+
+  <span class="k">if</span> <span class="o">[</span> -z <span class="s2">&#34;</span><span class="nv">$localIP</span><span class="s2">&#34;</span> <span class="o">]</span> <span class="p">;</span> <span class="k">then</span>
+    <span class="k">for</span> i in <span class="k">$(</span>networksetup -listallhardwareports <span class="p">|</span> grep Device <span class="p">|</span> awk <span class="s1">&#39;{print $2}&#39;</span> <span class="p">|</span> grep -v <span class="s2">&#34;en0\|en1&#34;</span><span class="k">)</span><span class="p">;</span> <span class="k">do</span>
+      <span class="nv">localIP</span><span class="o">=</span><span class="k">$(</span>ipconfig getifaddr <span class="nv">$i</span><span class="k">)</span>
+      <span class="k">if</span> <span class="o">[</span> ! -z <span class="s2">&#34;</span><span class="nv">$localIP</span><span class="s2">&#34;</span> <span class="o">]</span> <span class="p">;</span> <span class="k">then</span>
+        <span class="k">return</span>
+      <span class="k">fi</span>
+    <span class="k">done</span>
+  <span class="k">fi</span>
+  <span class="nb">echo</span> <span class="s2">&#34;can&#39;t find local IP&#34;</span>
+  <span class="nb">exit</span> <span class="m">1</span>
+<span class="o">}</span>
+
+startcontainer<span class="o">()</span> <span class="o">{</span>
+  docker run --hostname linux-games --user ubuntu -it -e <span class="nv">DISPLAY</span><span class="o">=</span><span class="nv">$localIP</span>:0 -e <span class="nv">XAUTHORITY</span><span class="o">=</span>~/.Xauthority -v /tmp/.X11-unix:/tmp/.X11-unix -v ~/.Xauthority:/.Xauthority <span class="nv">$IMAGENAME</span> <span class="nv">$1</span>
+<span class="o">}</span>
+
+getip
+xhost + <span class="nv">$localIP</span> <span class="p">&amp;</span>&gt; /dev/null
+
+<span class="k">if</span> <span class="o">[</span> -z <span class="s2">&#34;</span><span class="nv">$@</span><span class="s2">&#34;</span> <span class="o">]</span> <span class="p">;</span> <span class="k">then</span>
+  startcontainer bash
+<span class="k">else</span>
+  startcontainer <span class="nv">$@</span>
+<span class="k">fi</span>
+</code></pre></div><p>it works as expected</p>
+<div class="highlight"><pre class="chroma"><code class="language-no-highlight" data-lang="no-highlight">./run-container.sh
+five-or-more - make color lines of five or more length
+bovo - gomoku (five in line) board game
+bomber - arcade spaceship game
+four-in-a-row - Four in a Row game for GNOME
+gnome-chess - chess game with 3D graphics
+gnome-mines - popular minesweeper puzzle game for GNOME
+gnome-nibbles - snake game, up to four players
+gnome-klotski - Klotski puzzle game for GNOME
+gnome-mahjongg - classic Eastern tile game for GNOME
+gnome-robots - improved old BSD robots game
+granatier - Bomberman clone
+gnome-sudoku - Sudoku puzzle game for GNOME
+gnome-tetravex - put tiles on a board and match their edges together
+hitori - logic puzzle game similar to sudoku
+hoichess - xboard compatible chess engine to play chess with
+kajongg - classical Mah Jongg game
+iagno - popular Othello game for GNOME
+kapman - Pac-Man clone
+kblackbox - Black Box puzzle game
+kblocks - falling blocks game
+katomic - atomix puzzle game
+kbounce - Jezzball arcade game
+kfourinline - Connect Four game
+kdiamond - three-in-a-row game
+kbreakout - ball and paddle game
+kgoldrunner - Lode Runner arcade game
+killbots - port of the classic BSD console game robots
+kigo - go game
+kiriki - Yahtzee dice game
+klickety - SameGame puzzle game
+kjumpingcube - simple tactical game
+kmahjongg - mahjongg solitaire game
+klines - color lines game
+knavalbattle - battleship board game
+kmines - minesweeper game
+knetwalk - wire puzzle game
+kollision - simple ball dodging game
+kolf - miniature golf game
+konquest - simple turn-based strategy game
+kpat - solitaire card games
+kshisen - Shisen-Sho solitaire game
+kreversi - reversi board game
+ksirk - Risk strategy game
+ksnakeduel - snake race game
+ksquares - Dots and Boxes game
+kspaceduel - SpaceWar! arcade game
+ksudoku - Sudoku puzzle game and solver
+ktuberling - stamp drawing toy
+kubrick - game based on Rubik&#39;s Cube
+lskat - Lieutnant Skat card game
+palapeli - jigsaw puzzle game
+lightsoff - Light puzzle game
+picmi - Number logic game
+swell-foop - Colored ball puzzle game
+quadrapassel - popular Russian game, similar to Tetris
+tali - sort of poker with dice and less money
+ubuntu@linux-games:/usr/games$
+</code></pre></div><p>With no arguments passed, the container will <code>cat</code> the <code>gamelist</code> file and give the user an interactive shell in the <code>/usr/games</code> directory. Passing a game name as an argument, the container will simply run the game.</p>
+<p>Nice and simple!  👏</p>
+<h3 id="github-repository">GitHub repository</h3>
+<p><a href="https://github.com/TheDen/xserver-games-docker">https://github.com/TheDen/xserver-games-docker</a></p>
+</article>
+
+        </main><footer id="footer">
+    
+</footer>
+</body>
+</html>
