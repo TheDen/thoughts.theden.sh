@@ -1,6 +1,6 @@
 ---
 title: "Unix philosophy-esque approach to web tooling"
-date: "2020-05-12"
+date: "2021-06-05"
 draft: false
 ---
 
