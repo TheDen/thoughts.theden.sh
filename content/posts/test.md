@@ -18,9 +18,9 @@ done < <(find ./ -type f \( -name "*.png" -o -name "*.jpg" \) -print0)
 
 Some notes:
 
-* `cwebp` binaries from [libwebp](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html) is required.
+* The `cwebp` binary from [libwebp](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html) is required.
 * The `-q 90` flag is the quality factor.
-* Th snippet assumes that imag files are either `.jpg` or `.png`.
+* The snippet assumes that imag files are either `.jpg` or `.png`.
 
 
 # Deployment
@@ -40,7 +40,7 @@ git subtree push --prefix dist origin gh-pages
 
 # Minification 
 
-Using the [minify](https://github.com/tdewolff/minify) cli tool
+Using the [minify](https://github.com/tdewolff/minify) cli tool, this example snippet will minify any assets in the `dist/` folder. Files that contain `.min` will be excluded
 
 ```bash
 find ./dist/ -type f \( \

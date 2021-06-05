@@ -1,6 +1,6 @@
 ---
 title: "Unix philosophy-esque approach to web tooling"
-date: "2021-05-12"
+date: "2021-06-05"
 draft: false
 ---
 
@@ -18,9 +18,9 @@ done < <(find ./ -type f \( -name "*.png" -o -name "*.jpg" \) -print0)
 
 Some notes:
 
-* `cwebp` binaries from [libwebp](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html) is required.
+* The `cwebp` binary from [libwebp](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html) is required.
 * The `-q 90` flag is the quality factor.
-* Th snippet assumes that imag files are either `.jpg` or `.png`.
+* The snippet assumes that imag files are either `.jpg` or `.png`.
 
 
 # Deployment

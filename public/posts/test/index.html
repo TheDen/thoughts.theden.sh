@@ -23,7 +23,7 @@
     <header id="post-header">
         <h1>Unix philosophy-esque approach to web tooling</h1>
             <div>
-                <time>May 12, 2020</time>
+                <time>June 5, 2021</time>
                 </div>
     </header><p>[Ongoing: <a href="https://github.com/TheDen/thoughts.theden.sh">Suggestions welcome</a>]</p>
 <h1 id="creating-webp-images">Creating WebP images</h1>
@@ -34,9 +34,9 @@
 <span class="k">done</span> &lt; &lt;<span class="o">(</span>find ./ -type f <span class="se">\(</span> -name <span class="s2">&#34;*.png&#34;</span> -o -name <span class="s2">&#34;*.jpg&#34;</span> <span class="se">\)</span> -print0<span class="o">)</span>
 </code></pre></div><p>Some notes:</p>
 <ul>
-<li><code>cwebp</code> binaries from <a href="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html">libwebp</a> is required.</li>
+<li>The <code>cwebp</code> binary from <a href="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html">libwebp</a> is required.</li>
 <li>The <code>-q 90</code> flag is the quality factor.</li>
-<li>Th snippet assumes that imag files are either <code>.jpg</code> or <code>.png</code>.</li>
+<li>The snippet assumes that imag files are either <code>.jpg</code> or <code>.png</code>.</li>
 </ul>
 <h1 id="deployment">Deployment</h1>
 <p>Assuming you want <code>dist/</code> to be the deployed folder</p>
@@ -44,7 +44,7 @@
 </code></pre></div><p>and to push the folder as a specific git branch, for example to deploy it on GitHub pages</p>
 <div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">git subtree push --prefix dist origin gh-pages
 </code></pre></div><h1 id="minification">Minification</h1>
-<p>Using the <a href="https://github.com/tdewolff/minify">minify</a> cli tool</p>
+<p>Using the <a href="https://github.com/tdewolff/minify">minify</a> cli tool, this example snippet will minify any assets in the <code>dist/</code> folder. Files that contain <code>.min</code> will be excluded</p>
 <div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">find ./dist/ -type f <span class="se">\(</span> <span class="se">\
 </span><span class="se"></span>  -name <span class="s2">&#34;*.html&#34;</span> <span class="se">\
 </span><span class="se"></span>  -o -name <span class="s1">&#39;*.js&#39;</span> <span class="se">\
