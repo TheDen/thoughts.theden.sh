@@ -4,7 +4,7 @@ date: "2021-06-05"
 draft: false
 ---
 
-[Ongoing/Updatedg: [Suggestions welcome](https://github.com/TheDen/thoughts.theden.sh)]
+[Ongoing. I'll be adding for snippets to this page that I find useful over time  [Suggestions are also welcome](https://github.com/TheDen/thoughts.theden.sh)]
 
 # Creating WebP images
 If you want to recursively create `.webp` versions of images in a folder (same name, saved in same location, different extension name), this script will do that
