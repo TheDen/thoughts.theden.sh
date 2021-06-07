@@ -1,236 +1,135 @@
-<!DOCTYPE html>
-<html><head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="thoughts.theden.sh — Denis Khoshaba">
-    
-    <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
-    
-    <link rel="stylesheet" href="/css/style.min.css">
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="thoughts.theden.sh — Denis Khoshaba"><link rel="shortcut icon" href=https://thoughts.theden.sh/favicon.ico><link rel=stylesheet href=/css/style.min.css><title>On Withings & making my daily sleeping patterns public</title><header id=banner><h2><a href=https://thoughts.theden.sh/>thoughts</a></h2><nav><ul><li><a href=/ title=posts>posts</a></ul></nav></header><main id=content><article><header id=post-header><h1>On Withings & making my daily sleeping patterns public</h1><div><time>July 15, 2018</time></div></header><h2 id=some-history>Some History</h2><p>In 2008, a French consumer electronics company called <a href=https://en.wikipedia.org/wiki/Withings>Withings</a><sup id=fnref:1><a href=#fn:1 class=footnote-ref role=doc-noteref>1</a></sup> was founded. They focused on health tech and made what you would call <em>smart</em> or <em>connected</em> hardware. In 2017, Withings sold its business and brand to Nokia. One year later, Nokia announced that it would <a href=https://www.theverge.com/2018/5/2/17310378/nokia-selling-withings-digital-health-business-eric-carreel>sell the business back to the co-founder of Withings</a>. This back-and-forth wasn&rsquo;t surprising to anyone that used their products—to list a few missteps that Nokia made:<ul><li>They replaced the Withings Health Mate app with a Nokia branded version—which meant they introduced breaking changes and removed features that resulted in so many frustrated users that <a href=https://www.bbc.com/news/technology-40555752>Nokia publically announced they regretted the release</a>.<li>They discontinued the old Withings watches, including the flagship model which I own. They also discontinued most of the accessories, which meant that if people wanted a replacement wristband they&rsquo;d need to go with a third party or somehow find an original from eBay or elsewhere.<li>They disabled <a href=https://www.engadget.com/2018/01/22/nokia-disables-pulse-wave-velocity-body-cardio/>a key feature of its priciest scale</a>.</ul><p>They also redesigned the watches which in my opinion is another major misstep. But I&rsquo;ll let you be the judge<h3 id=from-this>From this</h3><p><img src=/ugly-sleep/activite.jpg alt="Withings Activité Sapphire"><h3 id=to-this>To this</h3><p><img src=/ugly-sleep/new-withings.png alt="Nokia Steel HR & Nokia Steel"><p>With a HR monitor and screen, battery life has decreased (although it&rsquo;s still great). Regardless, let&rsquo;s discuss the device I have which I think follows the <em>less is more</em> approach a lot closer.<h2 id=the-hardware>The Hardware</h2><p>I bought the now discontinued <a href=https://www.amazon.com/Withings-Activite-Activity-Tracking-Watch-Swiss-Made/dp/B00W1F6MF4>Withings Activité Sapphire</a> about <code>1.5</code> years ago. A few reasons for why I still use it as my main watch<ul><li>For what it&rsquo;s worth, it&rsquo;s passed the minimum criteria to be called <em>Swiss Made</em><li>It has a scratchproof sapphire glass face<li>Battery lasts ~8 months (an easily replaceable standard <code>CR2025</code> battery)<li>It&rsquo;s lowkey in design with respect to its tech, so it looks like it&rsquo;s just a regular watch<li>There&rsquo;s a vibration feature that acts as an alarm (however it has never woken me up successfully)<li>It tracks activity and sleep</ul><p>The last point on sleep is what&rsquo;s relevant to this post. Sleep tracking for the device has been accurate, or at least accurate enough to know I&rsquo;m not getting enough sleep. I presume it&rsquo;s based on movement since it can also tell you how many times you&rsquo;ve woken up during a deep sleep.<p><img src=/ugly-sleep/sleepshot.jpg alt="Daily sleep summary data through their WebUI"><h2 id=the-health-mate-api>The Health Mate API</h2><p>When the API was first developed, it used <code>OAuth 1.0</code> for authentication. They recently (July 2018) updated the API to be fully functional with <code>OAuth 2.0</code>, and what I&rsquo;m also hoping fixed a few bugs.<p>I developed the webapp in 2017 using the original API and it worked well most of the time, but soon after the Nokia rebranding they broke new token generation for me so I took it offline. I wasn&rsquo;t the only one experiencing difficulties, there is a GitHub gist on the API&rsquo;s limitations by the user <code>kayemonkeys</code> called <a href=https://gist.github.com/katemonkeys/e17580777b57915f5068>Everything Wrong With The Withings API</a> (it&rsquo;s a critical read).<p>One good thing about the new <code>OAuth 2.0</code> API is that at least the documentation is <a href=http://developer.health.nokia.com/oauth2/>a lot better than before</a>, and token generation actually works so I was able to take the webapp back online.<h2 id=getting-sleep>Getting Sleep</h2><p>I&rsquo;ll spare the details of creating <a href=https://account.health.nokia.com/partner/add_oauth2>a Nokia Health developer app</a> with your account, and generating an <a href=http://developer.health.nokia.com/oauth2/#tag/OAuth-2.0>access and refresh token</a> since they finally documented the process well enough for people to follow.<p>Now what I&rsquo;m looking for is a summary of my sleep for the day—luckily they have a <code>Getsummary</code> endpoint.<p><img src=/ugly-sleep/getsummary.png alt="endpoint: /v2/sleep?action=getsummary"><p>The <code>lastsummary</code> parameter is a timestamp of the last modified data retrieved in a precedent call. Setting it to <code>0</code> retrieves the first call, so I&rsquo;ll set it to that to grab the latest summary data (in this case for the previous day&rsquo;s sleep). The <code>startdateymd</code> and <code>enddateymd</code> parameters can be ignored since we&rsquo;re using <code>lastsummary</code>.<p>Now <code>curl</code>ing the endpoint<div class=highlight><pre class=chroma><code class=language-bash data-lang=bash>$ curl -s -X GET <span class=s1>&#39;https://api.health.nokia.com/v2/sleep action=getsummary&amp;access_token=XXXXXXXXXXXX&amp;lastupdate=0&#39;</span>
+</code></pre></div><p>will return<div class=highlight><pre class=chroma><code class=language-json data-lang=json><span class=p>{</span>
+	<span class=nt>&#34;status&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+	<span class=nt>&#34;body&#34;</span><span class=p>:</span> <span class=p>{</span>
+		<span class=nt>&#34;series&#34;</span><span class=p>:</span> <span class=p>[</span>
+			<span class=p>{</span>
+				<span class=nt>&#34;id&#34;</span><span class=p>:</span> <span class=mi>676918748</span><span class=p>,</span>
+				<span class=nt>&#34;timezone&#34;</span><span class=p>:</span> <span class=s2>&#34;Australia\/Sydney&#34;</span><span class=p>,</span>
+				<span class=nt>&#34;model&#34;</span><span class=p>:</span> <span class=mi>16</span><span class=p>,</span>
+				<span class=nt>&#34;startdate&#34;</span><span class=p>:</span> <span class=mi>1511190180</span><span class=p>,</span>
+				<span class=nt>&#34;enddate&#34;</span><span class=p>:</span> <span class=mi>1511215920</span><span class=p>,</span>
+				<span class=nt>&#34;date&#34;</span><span class=p>:</span> <span class=s2>&#34;2017-11-21&#34;</span><span class=p>,</span>
+				<span class=nt>&#34;data&#34;</span><span class=p>:</span> <span class=p>{</span>
+					<span class=nt>&#34;wakeupduration&#34;</span><span class=p>:</span> <span class=mi>660</span><span class=p>,</span>
+					<span class=nt>&#34;lightsleepduration&#34;</span><span class=p>:</span> <span class=mi>11640</span><span class=p>,</span>
+					<span class=nt>&#34;deepsleepduration&#34;</span><span class=p>:</span> <span class=mi>11520</span><span class=p>,</span>
+					<span class=nt>&#34;wakeupcount&#34;</span><span class=p>:</span> <span class=mi>3</span><span class=p>,</span>
+					<span class=nt>&#34;durationtosleep&#34;</span><span class=p>:</span> <span class=mi>480</span>
+				<span class=p>},</span>
+				<span class=nt>&#34;modified&#34;</span><span class=p>:</span> <span class=mi>1511221658</span>
+			<span class=p>},</span>
+			<span class=err>.</span>
+			<span class=err>.</span>
+			<span class=err>.</span>
+			<span class=p>{</span>
+				<span class=nt>&#34;id&#34;</span><span class=p>:</span> <span class=mi>831319563</span><span class=p>,</span>
+				<span class=nt>&#34;timezone&#34;</span><span class=p>:</span> <span class=s2>&#34;Australia\/Sydney&#34;</span><span class=p>,</span>
+				<span class=nt>&#34;model&#34;</span><span class=p>:</span> <span class=mi>16</span><span class=p>,</span>
+				<span class=nt>&#34;startdate&#34;</span><span class=p>:</span> <span class=mi>1531580880</span><span class=p>,</span>
+				<span class=nt>&#34;enddate&#34;</span><span class=p>:</span> <span class=mi>1531618380</span><span class=p>,</span>
+				<span class=nt>&#34;date&#34;</span><span class=p>:</span> <span class=s2>&#34;2018-07-15&#34;</span><span class=p>,</span>
+				<span class=nt>&#34;data&#34;</span><span class=p>:</span> <span class=p>{</span>
+					<span class=nt>&#34;wakeupduration&#34;</span><span class=p>:</span> <span class=mi>2280</span><span class=p>,</span>
+					<span class=nt>&#34;lightsleepduration&#34;</span><span class=p>:</span> <span class=mi>16560</span><span class=p>,</span>
+					<span class=nt>&#34;deepsleepduration&#34;</span><span class=p>:</span> <span class=mi>18660</span><span class=p>,</span>
+					<span class=nt>&#34;wakeupcount&#34;</span><span class=p>:</span> <span class=mi>1</span><span class=p>,</span>
+					<span class=nt>&#34;durationtosleep&#34;</span><span class=p>:</span> <span class=mi>0</span><span class=p>,</span>
+					<span class=nt>&#34;durationtowakeup&#34;</span><span class=p>:</span> <span class=mi>840</span>
+				<span class=p>},</span>
+				<span class=nt>&#34;modified&#34;</span><span class=p>:</span> <span class=mi>1531643973</span>
+			<span class=p>}</span>
+		<span class=p>],</span>
+		<span class=nt>&#34;more&#34;</span><span class=p>:</span> <span class=kc>false</span>
+	<span class=p>}</span>
+<span class=p>}</span>
+</code></pre></div><p>We obviously want the last element of the array since it has the latest data. The relevant data for my use-case is<div class=highlight><pre class=chroma><code class=language-json data-lang=json><span class=s2>&#34;date&#34;</span><span class=err>:</span> <span class=s2>&#34;2018-07-15&#34;</span>
+<span class=s2>&#34;lightsleepduration&#34;</span><span class=err>:</span> <span class=mi>16560</span>
+<span class=s2>&#34;deepsleepduration&#34;</span><span class=err>:</span> <span class=mi>18660</span>
+<span class=s2>&#34;wakeupcount&#34;</span><span class=err>:</span> <span class=mi>1</span>
+</code></pre></div><p>now I <em>could</em> show more data like <code>durationtosleep</code> and <code>durationtowakeup</code> but I feel information like that is too granular and potentially <em>creepy</em>. Feeling okay with sharing these values, we have all the information we need so let&rsquo;s make a <code>node</code> app.<h2 id=uglysleeptodayhttpsuglysleeptoday><a href=https://uglysleep.today>UglySleep.today</a></h2><p>Yeah, <em>that&rsquo;s</em> the domain I went with.<p>Let&rsquo;s grab the data and do the math<div class=highlight><pre class=chroma><code class=language-javascript data-lang=javascript><span class=kd>var</span> <span class=nx>sleepdata</span> <span class=o>=</span> <span class=kd>function</span><span class=p>()</span> <span class=p>{</span>
+  <span class=nx>request</span><span class=p>(</span><span class=s1>&#39;https://api.health.nokia.com/v2/sleep?action=getsummary&amp;lastupdate=0&amp;access_token=&#39;</span> <span class=o>+</span> <span class=nx>accesstoken</span><span class=p>,</span> <span class=p>{</span> <span class=nx>json</span><span class=o>:</span> <span class=kc>true</span> <span class=p>},</span> <span class=p>(</span><span class=nx>err</span><span class=p>,</span> <span class=nx>res</span><span class=p>,</span> <span class=nx>body</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=p>{</span>
+    <span class=k>if</span> <span class=p>(</span><span class=nx>err</span><span class=p>)</span> <span class=p>{</span> <span class=k>return</span> <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>err</span><span class=p>);</span> <span class=p>}</span>
+    <span class=kd>var</span> <span class=nx>idx</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>body</span><span class=p>.</span><span class=nx>series</span><span class=p>.</span><span class=nx>length</span><span class=o>-</span><span class=mi>1</span>
+    <span class=kd>var</span> <span class=nx>lightsleep</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>body</span><span class=p>.</span><span class=nx>series</span><span class=p>[</span><span class=nx>idx</span><span class=p>].</span><span class=nx>data</span><span class=p>.</span><span class=nx>lightsleepduration</span><span class=p>;</span>
+    <span class=kd>var</span> <span class=nx>deepsleep</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>body</span><span class=p>.</span><span class=nx>series</span><span class=p>[</span><span class=nx>idx</span><span class=p>].</span><span class=nx>data</span><span class=p>.</span><span class=nx>deepsleepduration</span><span class=p>;</span>
+    <span class=kd>var</span> <span class=nx>waketimes</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>body</span><span class=p>.</span><span class=nx>series</span><span class=p>[</span><span class=nx>idx</span><span class=p>].</span><span class=nx>data</span><span class=p>.</span><span class=nx>wakeupcount</span><span class=p>;</span>
+    <span class=kd>var</span> <span class=nx>sleepdate</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>body</span><span class=p>.</span><span class=nx>series</span><span class=p>[</span><span class=nx>idx</span><span class=p>].</span><span class=nx>date</span><span class=p>;</span>
+    <span class=nx>sdata</span> <span class=o>=</span> <span class=p>[((</span><span class=nx>lightsleep</span><span class=o>+</span><span class=nx>deepsleep</span><span class=p>)</span><span class=o>/</span><span class=mi>60</span><span class=o>/</span><span class=mi>60</span><span class=p>).</span><span class=nx>toFixed</span><span class=p>(</span><span class=mi>1</span><span class=p>).</span><span class=nx>toString</span><span class=p>(),</span> <span class=nx>waketimes</span><span class=p>.</span><span class=nx>toString</span><span class=p>(),</span> <span class=nx>sleepdate</span><span class=p>.</span><span class=nx>toString</span><span class=p>()];</span>
+  <span class=p>});</span>
+<span class=p>}</span>
+</code></pre></div><p>Note that:<ul><li>The <code>lightsleep</code> and <code>deepsleep</code> values are returned as <code>integers</code>, with unit of time as seconds (a peice of information they haven&rsquo;t carried over in their new documentation)<li>The generated <code>accesstoken</code> expires every 4 hours, so we&rsquo;ll use the <code>Refresh Token</code> endpoint to generate a new <code>access_token</code> every hour<li>We need to pass in <code>client_id</code>, <code>client_secret</code>, and <code>refresh_token</code> as environment variables for the <code>Refresh Token</code> endpoint</ul><p>Using node&rsquo;s <a href=https://www.npmjs.com/package/ejs>ejs</a> to inject the <code>sdata</code> onto the webpage, and node&rsquo;s <a href=https://www.npmjs.com/package/node-cron>cron</a> to run this periodically, we have the our full <code>server.js</code> file<div class=highlight><pre class=chroma><code class=language-javascript data-lang=javascript><span class=kr>const</span> <span class=nx>express</span> <span class=o>=</span> <span class=nx>require</span><span class=p>(</span><span class=s1>&#39;express&#39;</span><span class=p>)</span>
+<span class=kr>const</span> <span class=nx>app</span> <span class=o>=</span> <span class=nx>express</span><span class=p>()</span>
+<span class=kr>const</span> <span class=nx>request</span> <span class=o>=</span> <span class=nx>require</span><span class=p>(</span><span class=s1>&#39;request&#39;</span><span class=p>)</span>
+<span class=nx>app</span><span class=p>.</span><span class=nx>set</span><span class=p>(</span><span class=s1>&#39;view engine&#39;</span><span class=p>,</span> <span class=s1>&#39;ejs&#39;</span><span class=p>)</span>
 
-    <title>On Withings &amp; making my daily sleeping patterns public</title>
-</head>
-<body><header id="banner">
-    <h2><a href="https://thoughts.theden.sh/">thoughts</a></h2>
-    <nav>
-        <ul>
-            <li>
-                <a href="/" title="posts">posts</a>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main id="content">
-<article>
-    <header id="post-header">
-        <h1>On Withings &amp; making my daily sleeping patterns public</h1>
-            <div>
-                <time>July 15, 2018</time>
-                </div>
-    </header><h2 id="some-history">Some History</h2>
-<p>In 2008, a French consumer electronics company called <a href="https://en.wikipedia.org/wiki/Withings">Withings</a><sup id="fnref:1"><a href="#fn:1" class="footnote-ref" role="doc-noteref">1</a></sup> was founded. They focused on health tech and made what you would call <em>smart</em> or <em>connected</em> hardware. In 2017, Withings sold its business and brand to Nokia. One year later, Nokia announced that it would <a href="https://www.theverge.com/2018/5/2/17310378/nokia-selling-withings-digital-health-business-eric-carreel">sell the business back to the co-founder of Withings</a>. This back-and-forth wasn&rsquo;t surprising to anyone that used their products—to list a few missteps that Nokia made:</p>
-<ul>
-<li>They replaced the Withings Health Mate app with a Nokia branded version—which meant they introduced breaking changes and removed features that resulted in so many frustrated users that <a href="https://www.bbc.com/news/technology-40555752">Nokia publically announced they regretted the release</a>.</li>
-<li>They discontinued the old Withings watches, including the flagship model which I own. They also discontinued most of the accessories, which meant that if people wanted a replacement wristband they&rsquo;d need to go with a third party or somehow find an original from eBay or elsewhere.</li>
-<li>They disabled <a href="https://www.engadget.com/2018/01/22/nokia-disables-pulse-wave-velocity-body-cardio/"> a key feature of its priciest scale</a>.</li>
-</ul>
-<p>They also redesigned the watches which in my opinion is another major misstep. But I&rsquo;ll let you be the judge</p>
-<h3 id="from-this">From this</h3>
-<p><img src="/ugly-sleep/activite.jpg" alt="Withings Activité Sapphire"></p>
-<h3 id="to-this">To this</h3>
-<p><img src="/ugly-sleep/new-withings.png" alt="Nokia Steel HR & Nokia Steel"></p>
-<p>With a HR monitor and screen, battery life has decreased (although it&rsquo;s still great). Regardless, let&rsquo;s discuss the device I have which I think follows the <em>less is more</em> approach a lot closer.</p>
-<h2 id="the-hardware">The Hardware</h2>
-<p>I bought the now discontinued <a href="https://www.amazon.com/Withings-Activite-Activity-Tracking-Watch-Swiss-Made/dp/B00W1F6MF4">Withings Activité Sapphire</a> about <code>1.5</code> years ago. A few reasons for why I still use it as my main watch</p>
-<ul>
-<li>For what it&rsquo;s worth, it&rsquo;s passed the minimum criteria to be called <em>Swiss Made</em></li>
-<li>It has a scratchproof sapphire glass face</li>
-<li>Battery lasts ~8 months (an easily replaceable standard <code>CR2025</code> battery)</li>
-<li>It&rsquo;s lowkey in design with respect to its tech, so it looks like it&rsquo;s just a regular watch</li>
-<li>There&rsquo;s a vibration feature that acts as an alarm (however it has never woken me up successfully)</li>
-<li>It tracks activity and sleep</li>
-</ul>
-<p>The last point on sleep is what&rsquo;s relevant to this post. Sleep tracking for the device has been accurate, or at least accurate enough to know I&rsquo;m not getting enough sleep. I presume it&rsquo;s based on movement since it can also tell you how many times you&rsquo;ve woken up during a deep sleep.</p>
-<p><img src="/ugly-sleep/sleepshot.jpg" alt="Daily sleep summary data through their WebUI"></p>
-<h2 id="the-health-mate-api">The Health Mate API</h2>
-<p>When the API was first developed, it used <code>OAuth 1.0</code> for authentication. They recently (July 2018) updated the API to be fully functional with <code>OAuth 2.0</code>, and what I&rsquo;m also hoping fixed a few bugs.</p>
-<p>I developed the webapp in 2017 using the original API and it worked well most of the time, but soon after the Nokia rebranding they broke new token generation for me so I took it offline. I wasn&rsquo;t the only one experiencing difficulties, there is a GitHub gist on the API&rsquo;s limitations by the user <code>kayemonkeys</code> called <a href="https://gist.github.com/katemonkeys/e17580777b57915f5068">Everything Wrong With The Withings API</a> (it&rsquo;s a critical read).</p>
-<p>One good thing about the new <code>OAuth 2.0</code> API is that at least the  documentation is <a href="http://developer.health.nokia.com/oauth2/">a lot better than before</a>, and token generation actually works so I was able to take the webapp back online.</p>
-<h2 id="getting-sleep">Getting Sleep</h2>
-<p>I&rsquo;ll spare the details of creating <a href="https://account.health.nokia.com/partner/add_oauth2">a Nokia Health developer app</a> with your account, and generating an <a href="http://developer.health.nokia.com/oauth2/#tag/OAuth-2.0">access and refresh token </a> since they finally documented the process well enough for people to follow.</p>
-<p>Now what I&rsquo;m looking for is a summary of my sleep for the day—luckily they have a <code>Getsummary</code> endpoint.</p>
-<p><img src="/ugly-sleep/getsummary.png" alt="endpoint: /v2/sleep?action=getsummary"></p>
-<p>The <code>lastsummary</code> parameter is a timestamp of the last modified data retrieved in a precedent call. Setting it to <code>0</code> retrieves the first call, so I&rsquo;ll set it to that to grab the latest summary data (in this case for the previous day&rsquo;s sleep). The <code>startdateymd</code> and <code>enddateymd</code> parameters can be ignored since we&rsquo;re using <code>lastsummary</code>.</p>
-<p>Now <code>curl</code>ing the endpoint</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ curl -s -X GET <span class="s1">&#39;https://api.health.nokia.com/v2/sleep action=getsummary&amp;access_token=XXXXXXXXXXXX&amp;lastupdate=0&#39;</span>
-</code></pre></div><p>will return</p>
-<div class="highlight"><pre class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
-	<span class="nt">&#34;status&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-	<span class="nt">&#34;body&#34;</span><span class="p">:</span> <span class="p">{</span>
-		<span class="nt">&#34;series&#34;</span><span class="p">:</span> <span class="p">[</span>
-			<span class="p">{</span>
-				<span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">676918748</span><span class="p">,</span>
-				<span class="nt">&#34;timezone&#34;</span><span class="p">:</span> <span class="s2">&#34;Australia\/Sydney&#34;</span><span class="p">,</span>
-				<span class="nt">&#34;model&#34;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
-				<span class="nt">&#34;startdate&#34;</span><span class="p">:</span> <span class="mi">1511190180</span><span class="p">,</span>
-				<span class="nt">&#34;enddate&#34;</span><span class="p">:</span> <span class="mi">1511215920</span><span class="p">,</span>
-				<span class="nt">&#34;date&#34;</span><span class="p">:</span> <span class="s2">&#34;2017-11-21&#34;</span><span class="p">,</span>
-				<span class="nt">&#34;data&#34;</span><span class="p">:</span> <span class="p">{</span>
-					<span class="nt">&#34;wakeupduration&#34;</span><span class="p">:</span> <span class="mi">660</span><span class="p">,</span>
-					<span class="nt">&#34;lightsleepduration&#34;</span><span class="p">:</span> <span class="mi">11640</span><span class="p">,</span>
-					<span class="nt">&#34;deepsleepduration&#34;</span><span class="p">:</span> <span class="mi">11520</span><span class="p">,</span>
-					<span class="nt">&#34;wakeupcount&#34;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-					<span class="nt">&#34;durationtosleep&#34;</span><span class="p">:</span> <span class="mi">480</span>
-				<span class="p">},</span>
-				<span class="nt">&#34;modified&#34;</span><span class="p">:</span> <span class="mi">1511221658</span>
-			<span class="p">},</span>
-			<span class="err">.</span>
-			<span class="err">.</span>
-			<span class="err">.</span>
-			<span class="p">{</span>
-				<span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="mi">831319563</span><span class="p">,</span>
-				<span class="nt">&#34;timezone&#34;</span><span class="p">:</span> <span class="s2">&#34;Australia\/Sydney&#34;</span><span class="p">,</span>
-				<span class="nt">&#34;model&#34;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
-				<span class="nt">&#34;startdate&#34;</span><span class="p">:</span> <span class="mi">1531580880</span><span class="p">,</span>
-				<span class="nt">&#34;enddate&#34;</span><span class="p">:</span> <span class="mi">1531618380</span><span class="p">,</span>
-				<span class="nt">&#34;date&#34;</span><span class="p">:</span> <span class="s2">&#34;2018-07-15&#34;</span><span class="p">,</span>
-				<span class="nt">&#34;data&#34;</span><span class="p">:</span> <span class="p">{</span>
-					<span class="nt">&#34;wakeupduration&#34;</span><span class="p">:</span> <span class="mi">2280</span><span class="p">,</span>
-					<span class="nt">&#34;lightsleepduration&#34;</span><span class="p">:</span> <span class="mi">16560</span><span class="p">,</span>
-					<span class="nt">&#34;deepsleepduration&#34;</span><span class="p">:</span> <span class="mi">18660</span><span class="p">,</span>
-					<span class="nt">&#34;wakeupcount&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-					<span class="nt">&#34;durationtosleep&#34;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
-					<span class="nt">&#34;durationtowakeup&#34;</span><span class="p">:</span> <span class="mi">840</span>
-				<span class="p">},</span>
-				<span class="nt">&#34;modified&#34;</span><span class="p">:</span> <span class="mi">1531643973</span>
-			<span class="p">}</span>
-		<span class="p">],</span>
-		<span class="nt">&#34;more&#34;</span><span class="p">:</span> <span class="kc">false</span>
-	<span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div><p>We obviously want the last element of the array since it has the latest data. The relevant data for my use-case is</p>
-<div class="highlight"><pre class="chroma"><code class="language-json" data-lang="json"><span class="s2">&#34;date&#34;</span><span class="err">:</span> <span class="s2">&#34;2018-07-15&#34;</span>
-<span class="s2">&#34;lightsleepduration&#34;</span><span class="err">:</span> <span class="mi">16560</span>
-<span class="s2">&#34;deepsleepduration&#34;</span><span class="err">:</span> <span class="mi">18660</span>
-<span class="s2">&#34;wakeupcount&#34;</span><span class="err">:</span> <span class="mi">1</span>
-</code></pre></div><p>now I <em>could</em> show more data like <code>durationtosleep</code> and <code>durationtowakeup</code> but I feel information like that is too granular and potentially <em>creepy</em>. Feeling okay with sharing these values, we have all the information we need so let&rsquo;s make a <code>node</code> app.</p>
-<h2 id="uglysleeptodayhttpsuglysleeptoday"><a href="https://uglysleep.today">UglySleep.today</a></h2>
-<p>Yeah, <em>that&rsquo;s</em> the domain I went with.</p>
-<p>Let&rsquo;s grab the data and do the math</p>
-<div class="highlight"><pre class="chroma"><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">sleepdata</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="nx">request</span><span class="p">(</span><span class="s1">&#39;https://api.health.nokia.com/v2/sleep?action=getsummary&amp;lastupdate=0&amp;access_token=&#39;</span> <span class="o">+</span> <span class="nx">accesstoken</span><span class="p">,</span> <span class="p">{</span> <span class="nx">json</span><span class="o">:</span> <span class="kc">true</span> <span class="p">},</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">body</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span> <span class="p">}</span>
-    <span class="kd">var</span> <span class="nx">idx</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">series</span><span class="p">.</span><span class="nx">length</span><span class="o">-</span><span class="mi">1</span>
-    <span class="kd">var</span> <span class="nx">lightsleep</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">series</span><span class="p">[</span><span class="nx">idx</span><span class="p">].</span><span class="nx">data</span><span class="p">.</span><span class="nx">lightsleepduration</span><span class="p">;</span>
-    <span class="kd">var</span> <span class="nx">deepsleep</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">series</span><span class="p">[</span><span class="nx">idx</span><span class="p">].</span><span class="nx">data</span><span class="p">.</span><span class="nx">deepsleepduration</span><span class="p">;</span>
-    <span class="kd">var</span> <span class="nx">waketimes</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">series</span><span class="p">[</span><span class="nx">idx</span><span class="p">].</span><span class="nx">data</span><span class="p">.</span><span class="nx">wakeupcount</span><span class="p">;</span>
-    <span class="kd">var</span> <span class="nx">sleepdate</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">series</span><span class="p">[</span><span class="nx">idx</span><span class="p">].</span><span class="nx">date</span><span class="p">;</span>
-    <span class="nx">sdata</span> <span class="o">=</span> <span class="p">[((</span><span class="nx">lightsleep</span><span class="o">+</span><span class="nx">deepsleep</span><span class="p">)</span><span class="o">/</span><span class="mi">60</span><span class="o">/</span><span class="mi">60</span><span class="p">).</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">toString</span><span class="p">(),</span> <span class="nx">waketimes</span><span class="p">.</span><span class="nx">toString</span><span class="p">(),</span> <span class="nx">sleepdate</span><span class="p">.</span><span class="nx">toString</span><span class="p">()];</span>
-  <span class="p">});</span>
-<span class="p">}</span>
-</code></pre></div><p>Note that:</p>
-<ul>
-<li>The <code>lightsleep</code> and <code>deepsleep</code> values are returned as <code>integers</code>, with unit of time as seconds (a peice of information they haven&rsquo;t carried over in their new documentation)</li>
-<li>The generated <code>accesstoken</code> expires every 4 hours, so we&rsquo;ll use the <code>Refresh Token</code> endpoint to generate a new <code>access_token</code> every hour</li>
-<li>We need to pass in <code>client_id</code>, <code>client_secret</code>, and <code>refresh_token</code> as environment variables for the <code>Refresh Token</code> endpoint</li>
-</ul>
-<p>Using node&rsquo;s <a href="https://www.npmjs.com/package/ejs">ejs</a> to inject the <code>sdata</code> onto the webpage, and node&rsquo;s <a href="https://www.npmjs.com/package/node-cron">cron</a> to run this periodically, we have the our full <code>server.js</code> file</p>
-<div class="highlight"><pre class="chroma"><code class="language-javascript" data-lang="javascript"><span class="kr">const</span> <span class="nx">express</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;express&#39;</span><span class="p">)</span>
-<span class="kr">const</span> <span class="nx">app</span> <span class="o">=</span> <span class="nx">express</span><span class="p">()</span>
-<span class="kr">const</span> <span class="nx">request</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;request&#39;</span><span class="p">)</span>
-<span class="nx">app</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="s1">&#39;view engine&#39;</span><span class="p">,</span> <span class="s1">&#39;ejs&#39;</span><span class="p">)</span>
+<span class=nx>app</span><span class=p>.</span><span class=nx>use</span><span class=p>(</span><span class=nx>express</span><span class=p>.</span><span class=kr>static</span><span class=p>(</span><span class=s1>&#39;public&#39;</span><span class=p>))</span>
 
-<span class="nx">app</span><span class="p">.</span><span class="nx">use</span><span class="p">(</span><span class="nx">express</span><span class="p">.</span><span class="kr">static</span><span class="p">(</span><span class="s1">&#39;public&#39;</span><span class="p">))</span>
+<span class=nx>clientid</span> <span class=o>=</span> <span class=nx>process</span><span class=p>.</span><span class=nx>env</span><span class=p>.</span><span class=nx>CLIENT_ID</span>
+<span class=nx>clientsecret</span> <span class=o>=</span> <span class=nx>process</span><span class=p>.</span><span class=nx>env</span><span class=p>.</span><span class=nx>CLIENT_SECRET</span>
+<span class=nx>refreshtoken</span> <span class=o>=</span> <span class=nx>process</span><span class=p>.</span><span class=nx>env</span><span class=p>.</span><span class=nx>REFRESH_TOKEN</span>
 
-<span class="nx">clientid</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLIENT_ID</span>
-<span class="nx">clientsecret</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">CLIENT_SECRET</span>
-<span class="nx">refreshtoken</span> <span class="o">=</span> <span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">REFRESH_TOKEN</span>
+<span class=nx>sdata</span> <span class=o>=</span> <span class=p>[]</span>
+<span class=kd>function</span> <span class=nx>sleepdata</span><span class=p>(</span><span class=nx>accesstoken</span><span class=p>)</span> <span class=p>{</span>
+  <span class=nx>request</span><span class=p>(</span><span class=s1>&#39;https://api.health.nokia.com/v2/sleep?action=getsummary&amp;lastupdate=0&amp;access_token=&#39;</span> <span class=o>+</span> <span class=nx>accesstoken</span><span class=p>,</span> <span class=p>{</span> <span class=nx>json</span><span class=o>:</span> <span class=kc>true</span> <span class=p>},</span> <span class=p>(</span><span class=nx>err</span><span class=p>,</span> <span class=nx>res</span><span class=p>,</span> <span class=nx>body</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=p>{</span>
+    <span class=k>if</span> <span class=p>(</span><span class=nx>err</span><span class=p>)</span> <span class=p>{</span> <span class=k>return</span> <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>err</span><span class=p>);</span> <span class=p>}</span>
+    <span class=kd>var</span> <span class=nx>idx</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>body</span><span class=p>.</span><span class=nx>series</span><span class=p>.</span><span class=nx>length</span><span class=o>-</span><span class=mi>1</span>
+    <span class=kd>var</span> <span class=nx>lightsleep</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>body</span><span class=p>.</span><span class=nx>series</span><span class=p>[</span><span class=nx>idx</span><span class=p>].</span><span class=nx>data</span><span class=p>.</span><span class=nx>lightsleepduration</span>
+    <span class=kd>var</span> <span class=nx>deepsleep</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>body</span><span class=p>.</span><span class=nx>series</span><span class=p>[</span><span class=nx>idx</span><span class=p>].</span><span class=nx>data</span><span class=p>.</span><span class=nx>deepsleepduration</span>
+    <span class=kd>var</span> <span class=nx>waketimes</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>body</span><span class=p>.</span><span class=nx>series</span><span class=p>[</span><span class=nx>idx</span><span class=p>].</span><span class=nx>data</span><span class=p>.</span><span class=nx>wakeupcount</span>
+    <span class=kd>var</span> <span class=nx>sleepdate</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>body</span><span class=p>.</span><span class=nx>series</span><span class=p>[</span><span class=nx>idx</span><span class=p>].</span><span class=nx>date</span>
+    <span class=nx>sdata</span> <span class=o>=</span> <span class=p>[((</span><span class=nx>lightsleep</span><span class=o>+</span><span class=nx>deepsleep</span><span class=p>)</span><span class=o>/</span><span class=mi>60</span><span class=o>/</span><span class=mi>60</span><span class=p>).</span><span class=nx>toFixed</span><span class=p>(</span><span class=mi>1</span><span class=p>).</span><span class=nx>toString</span><span class=p>(),</span> <span class=nx>waketimes</span><span class=p>.</span><span class=nx>toString</span><span class=p>(),</span> <span class=nx>sleepdate</span><span class=p>.</span><span class=nx>toString</span><span class=p>()]</span>
+  <span class=p>})</span>
+<span class=p>}</span>
 
-<span class="nx">sdata</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="kd">function</span> <span class="nx">sleepdata</span><span class="p">(</span><span class="nx">accesstoken</span><span class="p">)</span> <span class="p">{</span>
-  <span class="nx">request</span><span class="p">(</span><span class="s1">&#39;https://api.health.nokia.com/v2/sleep?action=getsummary&amp;lastupdate=0&amp;access_token=&#39;</span> <span class="o">+</span> <span class="nx">accesstoken</span><span class="p">,</span> <span class="p">{</span> <span class="nx">json</span><span class="o">:</span> <span class="kc">true</span> <span class="p">},</span> <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">res</span><span class="p">,</span> <span class="nx">body</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
-    <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span> <span class="p">}</span>
-    <span class="kd">var</span> <span class="nx">idx</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">series</span><span class="p">.</span><span class="nx">length</span><span class="o">-</span><span class="mi">1</span>
-    <span class="kd">var</span> <span class="nx">lightsleep</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">series</span><span class="p">[</span><span class="nx">idx</span><span class="p">].</span><span class="nx">data</span><span class="p">.</span><span class="nx">lightsleepduration</span>
-    <span class="kd">var</span> <span class="nx">deepsleep</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">series</span><span class="p">[</span><span class="nx">idx</span><span class="p">].</span><span class="nx">data</span><span class="p">.</span><span class="nx">deepsleepduration</span>
-    <span class="kd">var</span> <span class="nx">waketimes</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">series</span><span class="p">[</span><span class="nx">idx</span><span class="p">].</span><span class="nx">data</span><span class="p">.</span><span class="nx">wakeupcount</span>
-    <span class="kd">var</span> <span class="nx">sleepdate</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">series</span><span class="p">[</span><span class="nx">idx</span><span class="p">].</span><span class="nx">date</span>
-    <span class="nx">sdata</span> <span class="o">=</span> <span class="p">[((</span><span class="nx">lightsleep</span><span class="o">+</span><span class="nx">deepsleep</span><span class="p">)</span><span class="o">/</span><span class="mi">60</span><span class="o">/</span><span class="mi">60</span><span class="p">).</span><span class="nx">toFixed</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">toString</span><span class="p">(),</span> <span class="nx">waketimes</span><span class="p">.</span><span class="nx">toString</span><span class="p">(),</span> <span class="nx">sleepdate</span><span class="p">.</span><span class="nx">toString</span><span class="p">()]</span>
-  <span class="p">})</span>
-<span class="p">}</span>
+<span class=kd>function</span> <span class=nx>gettoken</span><span class=p>()</span> <span class=p>{</span>
+  <span class=nx>request</span><span class=p>.</span><span class=nx>post</span><span class=p>(</span>
+    <span class=p>{</span>
+      <span class=nx>headers</span><span class=o>:</span> <span class=p>{</span><span class=s1>&#39;content-type&#39;</span> <span class=o>:</span> <span class=s1>&#39;application/x-www-form-urlencoded&#39;</span><span class=p>},</span>
+      <span class=nx>url</span><span class=o>:</span> <span class=s1>&#39;https://account.health.nokia.com/oauth2/token&#39;</span><span class=p>,</span>
+      <span class=nx>form</span><span class=o>:</span>
+      <span class=p>{</span>
+        <span class=s1>&#39;grant_type&#39;</span><span class=o>:</span> <span class=s1>&#39;refresh_token&#39;</span><span class=p>,</span>
+        <span class=s1>&#39;client_id&#39;</span><span class=o>:</span> <span class=nx>clientid</span><span class=p>,</span>
+        <span class=s1>&#39;client_secret&#39;</span><span class=o>:</span> <span class=nx>clientsecret</span><span class=p>,</span>
+        <span class=s1>&#39;refresh_token&#39;</span><span class=o>:</span> <span class=nx>refreshtoken</span><span class=p>,</span>
+      <span class=p>},</span>
+      <span class=nx>json</span><span class=o>:</span> <span class=kc>true</span><span class=p>,</span>
+    <span class=p>},</span>
+    <span class=p>(</span><span class=nx>err</span><span class=p>,</span> <span class=nx>response</span><span class=p>,</span> <span class=nx>body</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=p>{</span>
+      <span class=k>if</span> <span class=p>(</span><span class=nx>err</span><span class=p>)</span> <span class=p>{</span> <span class=k>return</span> <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=nx>err</span><span class=p>);</span> <span class=p>}</span>
+      <span class=nx>sleepdata</span><span class=p>(</span><span class=nx>body</span><span class=p>.</span><span class=nx>access_token</span><span class=p>)</span>
+      <span class=nx>refreshtoken</span> <span class=o>=</span> <span class=nx>body</span><span class=p>.</span><span class=nx>refresh_token</span>
+    <span class=p>})</span>
+<span class=p>}</span>
 
-<span class="kd">function</span> <span class="nx">gettoken</span><span class="p">()</span> <span class="p">{</span>
-  <span class="nx">request</span><span class="p">.</span><span class="nx">post</span><span class="p">(</span>
-    <span class="p">{</span>
-      <span class="nx">headers</span><span class="o">:</span> <span class="p">{</span><span class="s1">&#39;content-type&#39;</span> <span class="o">:</span> <span class="s1">&#39;application/x-www-form-urlencoded&#39;</span><span class="p">},</span>
-      <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;https://account.health.nokia.com/oauth2/token&#39;</span><span class="p">,</span>
-      <span class="nx">form</span><span class="o">:</span>
-      <span class="p">{</span>
-        <span class="s1">&#39;grant_type&#39;</span><span class="o">:</span> <span class="s1">&#39;refresh_token&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;client_id&#39;</span><span class="o">:</span> <span class="nx">clientid</span><span class="p">,</span>
-        <span class="s1">&#39;client_secret&#39;</span><span class="o">:</span> <span class="nx">clientsecret</span><span class="p">,</span>
-        <span class="s1">&#39;refresh_token&#39;</span><span class="o">:</span> <span class="nx">refreshtoken</span><span class="p">,</span>
-      <span class="p">},</span>
-      <span class="nx">json</span><span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
-    <span class="p">},</span>
-    <span class="p">(</span><span class="nx">err</span><span class="p">,</span> <span class="nx">response</span><span class="p">,</span> <span class="nx">body</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
-      <span class="k">if</span> <span class="p">(</span><span class="nx">err</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">err</span><span class="p">);</span> <span class="p">}</span>
-      <span class="nx">sleepdata</span><span class="p">(</span><span class="nx">body</span><span class="p">.</span><span class="nx">access_token</span><span class="p">)</span>
-      <span class="nx">refreshtoken</span> <span class="o">=</span> <span class="nx">body</span><span class="p">.</span><span class="nx">refresh_token</span>
-    <span class="p">})</span>
-<span class="p">}</span>
+<span class=nx>gettoken</span><span class=p>()</span>
 
-<span class="nx">gettoken</span><span class="p">()</span>
+<span class=kd>var</span> <span class=nx>CronJob</span> <span class=o>=</span> <span class=nx>require</span><span class=p>(</span><span class=s1>&#39;cron&#39;</span><span class=p>).</span><span class=nx>CronJob</span>
+<span class=k>new</span> <span class=nx>CronJob</span><span class=p>(</span><span class=s1>&#39;*/30 * * * *&#39;</span><span class=p>,</span> <span class=kd>function</span><span class=p>()</span> <span class=p>{</span>
+  <span class=nx>gettoken</span><span class=p>()</span>
+<span class=p>},</span> <span class=kc>null</span><span class=p>,</span> <span class=kc>true</span><span class=p>,</span> <span class=s1>&#39;Australia/Sydney&#39;</span><span class=p>)</span>
 
-<span class="kd">var</span> <span class="nx">CronJob</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;cron&#39;</span><span class="p">).</span><span class="nx">CronJob</span>
-<span class="k">new</span> <span class="nx">CronJob</span><span class="p">(</span><span class="s1">&#39;*/30 * * * *&#39;</span><span class="p">,</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-  <span class="nx">gettoken</span><span class="p">()</span>
-<span class="p">},</span> <span class="kc">null</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="s1">&#39;Australia/Sydney&#39;</span><span class="p">)</span>
+<span class=nx>app</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;/&#39;</span><span class=p>,</span> <span class=p>(</span><span class=nx>req</span><span class=p>,</span> <span class=nx>res</span><span class=p>)</span> <span class=p>=&gt;</span> <span class=p>{</span>
+  <span class=nx>res</span><span class=p>.</span><span class=nx>render</span><span class=p>(</span><span class=s1>&#39;index.ejs&#39;</span><span class=p>)</span>
+<span class=p>})</span>
 
-<span class="nx">app</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nx">req</span><span class="p">,</span> <span class="nx">res</span><span class="p">)</span> <span class="p">=&gt;</span> <span class="p">{</span>
-  <span class="nx">res</span><span class="p">.</span><span class="nx">render</span><span class="p">(</span><span class="s1">&#39;index.ejs&#39;</span><span class="p">)</span>
-<span class="p">})</span>
-
-<span class="nx">app</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">PORT</span> <span class="o">||</span> <span class="mi">5000</span><span class="p">)</span>
-</code></pre></div><p>Nice and simple. Now we just write some <code>CSS</code>, make a cute <code>favicon.ico</code>, and we have our app.</p>
-<p><img src="/ugly-sleep/uglysleepweb.gif" alt=""></p>
-<p>And here&rsquo;s the <a href="https://github.com/TheDen/uglysleep.today">GitHub repo</a>.</p>
-<h2 id="deploying">Deploying</h2>
-<p>Creating a multi-stage <code>Dockerfile</code> for deployment on <a href="https://zeit.co/">ZEIT</a></p>
-<div class="highlight"><pre class="chroma"><code class="language-Dockerfile" data-lang="Dockerfile"><span class="k">FROM</span><span class="s"> node:carbon-alpine AS builder</span><span class="err">
-</span><span class="err">
-</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> /app</span><span class="err">
-</span><span class="err"></span><span class="k">COPY</span> package.json server.js /app/<span class="err">
-</span><span class="err"></span><span class="k">COPY</span> views /app/views/<span class="err">
-</span><span class="err"></span><span class="k">COPY</span> public /app/public<span class="err">
-</span><span class="err"></span><span class="k">RUN</span> npm install<span class="err">
-</span><span class="err">
-</span><span class="err"></span><span class="k">FROM</span><span class="s"> node:carbon-alpine</span><span class="err">
-</span><span class="err">
-</span><span class="err"></span><span class="k">COPY</span> --from<span class="o">=</span>builder /app /app<span class="err">
-</span><span class="err"></span><span class="k">RUN</span> chown -R node:node /app/<span class="err">
-</span><span class="err"></span><span class="k">USER</span><span class="s"> node</span><span class="err">
-</span><span class="err"></span><span class="k">WORKDIR</span><span class="s"> /app</span><span class="err">
-</span><span class="err"></span><span class="k">EXPOSE</span><span class="s"> 5000</span><span class="err">
-</span><span class="err">
-</span><span class="err"></span><span class="k">CMD</span> <span class="p">[</span><span class="s2">&#34;node&#34;</span><span class="p">,</span> <span class="s2">&#34;server.js&#34;</span><span class="p">]</span><span class="err">
-</span></code></pre></div><p>Then all I need to do is run <code>now -e [ENV_VAR] </code>, and then <code>now alias</code> with my custom domain name. Zeit&rsquo;s documentation on <a href="https://zeit.co/docs/deployment-types/node">node deployment</a> and <a href="https://zeit.co/docs/features/aliases">custom domains</a> are easy to follow, and OSS SSL deployments are free.</p>
-<h2 id="on-privacy">On Privacy</h2>
-<p>Anyone can now easily check how much sleep I had the previous day by visiting <a href="http://www.uglysleep.today/">uglysleep.today</a>. Now I&rsquo;m a private guy but I feel okay with this—I&rsquo;m not sure why. Perhaps it&rsquo;s because I know the data isn&rsquo;t completely accurate, or that it&rsquo;s the previous day&rsquo;s data and ephemeral in how it&rsquo;s presented, or that it&rsquo;s only a total number of hours sleep, or maybe because it&rsquo;s presented in a fun and silly website that I chose to share, and have the ability to pull the plug on whenever I want?</p>
-<p>However, I can think of a few potential issues. Say I lie to someone by telling them I didn&rsquo;t get enough sleep—well, now they can verify my lie if they know the website. Or say if someone wants to log sleep metrics over a long period of time, it would be trivial to automatically log the data from the website every day into a database or file.</p>
-<p>Whatever the case, I haven&rsquo;t had an issue (yet).</p>
-<section class="footnotes" role="doc-endnotes">
-<hr>
-<ol>
-<li id="fn:1" role="doc-endnote">
-<p>Pronounced <em>why-things</em>&#160;<a href="#fnref:1" class="footnote-backref" role="doc-backlink">&#x21a9;&#xfe0e;</a></p>
-</li>
-</ol>
-</section>
-</article>
-
-        </main><footer id="footer">
-    
-</footer>
-</body>
-</html>
+<span class=nx>app</span><span class=p>.</span><span class=nx>listen</span><span class=p>(</span><span class=nx>process</span><span class=p>.</span><span class=nx>env</span><span class=p>.</span><span class=nx>PORT</span> <span class=o>||</span> <span class=mi>5000</span><span class=p>)</span>
+</code></pre></div><p>Nice and simple. Now we just write some <code>CSS</code>, make a cute <code>favicon.ico</code>, and we have our app.<p><img src=/ugly-sleep/uglysleepweb.gif alt><p>And here&rsquo;s the <a href=https://github.com/TheDen/uglysleep.today>GitHub repo</a>.<h2 id=deploying>Deploying</h2><p>Creating a multi-stage <code>Dockerfile</code> for deployment on <a href=https://zeit.co/>ZEIT</a><div class=highlight><pre class=chroma><code class=language-Dockerfile data-lang=Dockerfile><span class=k>FROM</span><span class=s> node:carbon-alpine AS builder</span><span class=err>
+</span><span class=err>
+</span><span class=err></span><span class=k>WORKDIR</span><span class=s> /app</span><span class=err>
+</span><span class=err></span><span class=k>COPY</span> package.json server.js /app/<span class=err>
+</span><span class=err></span><span class=k>COPY</span> views /app/views/<span class=err>
+</span><span class=err></span><span class=k>COPY</span> public /app/public<span class=err>
+</span><span class=err></span><span class=k>RUN</span> npm install<span class=err>
+</span><span class=err>
+</span><span class=err></span><span class=k>FROM</span><span class=s> node:carbon-alpine</span><span class=err>
+</span><span class=err>
+</span><span class=err></span><span class=k>COPY</span> --from<span class=o>=</span>builder /app /app<span class=err>
+</span><span class=err></span><span class=k>RUN</span> chown -R node:node /app/<span class=err>
+</span><span class=err></span><span class=k>USER</span><span class=s> node</span><span class=err>
+</span><span class=err></span><span class=k>WORKDIR</span><span class=s> /app</span><span class=err>
+</span><span class=err></span><span class=k>EXPOSE</span><span class=s> 5000</span><span class=err>
+</span><span class=err>
+</span><span class=err></span><span class=k>CMD</span> <span class=p>[</span><span class=s2>&#34;node&#34;</span><span class=p>,</span> <span class=s2>&#34;server.js&#34;</span><span class=p>]</span><span class=err>
+</span></code></pre></div><p>Then all I need to do is run <code>now -e [ENV_VAR] </code>, and then <code>now alias</code> with my custom domain name. Zeit&rsquo;s documentation on <a href=https://zeit.co/docs/deployment-types/node>node deployment</a> and <a href=https://zeit.co/docs/features/aliases>custom domains</a> are easy to follow, and OSS SSL deployments are free.<h2 id=on-privacy>On Privacy</h2><p>Anyone can now easily check how much sleep I had the previous day by visiting <a href=http://www.uglysleep.today/>uglysleep.today</a>. Now I&rsquo;m a private guy but I feel okay with this—I&rsquo;m not sure why. Perhaps it&rsquo;s because I know the data isn&rsquo;t completely accurate, or that it&rsquo;s the previous day&rsquo;s data and ephemeral in how it&rsquo;s presented, or that it&rsquo;s only a total number of hours sleep, or maybe because it&rsquo;s presented in a fun and silly website that I chose to share, and have the ability to pull the plug on whenever I want?<p>However, I can think of a few potential issues. Say I lie to someone by telling them I didn&rsquo;t get enough sleep—well, now they can verify my lie if they know the website. Or say if someone wants to log sleep metrics over a long period of time, it would be trivial to automatically log the data from the website every day into a database or file.<p>Whatever the case, I haven&rsquo;t had an issue (yet).<section class=footnotes role=doc-endnotes><hr><ol><li id=fn:1 role=doc-endnote><p>Pronounced <em>why-things</em>&#160;<a href=#fnref:1 class=footnote-backref role=doc-backlink>&#8617;&#xfe0e;</a></ol></section></article></main><footer id=footer></footer>

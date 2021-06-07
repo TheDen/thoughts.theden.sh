@@ -1,28 +1,3 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Posts on thoughts.theden.sh</title>
-    <link>https://thoughts.theden.sh/posts/</link>
-    <description>Recent content in Posts on thoughts.theden.sh</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <lastBuildDate>Sat, 05 Jun 2021 00:00:00 +0000</lastBuildDate>
-    
-	<atom:link href="https://thoughts.theden.sh/posts/index.xml" rel="self" type="application/rss+xml" />
-    
-    
-    
-    <item>
-      <title>Unix philosophy-esque approach to web tooling</title>
-      <link>https://thoughts.theden.sh/posts/unix-web/</link>
-      <pubDate>Sat, 05 Jun 2021 00:00:00 +0000</pubDate>
-      
-      <guid>https://thoughts.theden.sh/posts/unix-web/</guid>
-      <description>[Ongoing. I&amp;rsquo;ll be adding for snippets to this page that I find useful over time Suggestions are also welcome]
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on thoughts.theden.sh</title><link>https://thoughts.theden.sh/posts/</link><description>Recent content in Posts on thoughts.theden.sh</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 05 Jun 2021 00:00:00 +0000</lastBuildDate><atom:link href="https://thoughts.theden.sh/posts/index.xml" rel="self" type="application/rss+xml"/><item><title>Unix philosophy-esque approach to web tooling</title><link>https://thoughts.theden.sh/posts/unix-web/</link><pubDate>Sat, 05 Jun 2021 00:00:00 +0000</pubDate><guid>https://thoughts.theden.sh/posts/unix-web/</guid><description>[Ongoing. I&amp;rsquo;ll be adding for snippets to this page that I find useful over time Suggestions are also welcome]
 Creating WebP images If you want to recursively create .webp versions of images in a folder (same name, saved in same location, different extension name), this script will do that
-while IFS= read -r -d &amp;#39;&amp;#39; file; do cwebp -q 90 &amp;#34;$file&amp;#34; -o &amp;#34;${file%.*}.webp&amp;#34; || true done &amp;lt; &amp;lt;(find ./ -type f \( -name &amp;#34;*.</description>
-    </item>
-    
-    
-  </channel>
-</rss>
+while IFS= read -r -d &amp;#39;&amp;#39; file; do cwebp -q 90 &amp;#34;$file&amp;#34; -o &amp;#34;${file%.*}.webp&amp;#34; || true done &amp;lt; &amp;lt;(find ./ -type f \( -name &amp;#34;*.</description></item></channel></rss>

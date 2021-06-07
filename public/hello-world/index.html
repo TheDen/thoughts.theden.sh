@@ -1,49 +1,8 @@
-<!DOCTYPE html>
-<html><head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="thoughts.theden.sh — Denis Khoshaba">
-    
-    <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
-    
-    <link rel="stylesheet" href="/css/style.min.css">
-
-    <title>Hello, World.</title>
-</head>
-<body><header id="banner">
-    <h2><a href="https://thoughts.theden.sh/">thoughts</a></h2>
-    <nav>
-        <ul>
-            <li>
-                <a href="/" title="posts">posts</a>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main id="content">
-<article>
-    <header id="post-header">
-        <h1>Hello, World.</h1>
-            <div>
-                <time>May 10, 2018</time>
-                </div>
-    </header><h1 id="welcome">Welcome</h1>
-<p>This is my first post. I&rsquo;ve just set up <a href="https://github.com/gohugoio/hugo">Hugo</a> with <a href="https://www.netlify.com/">Netlify</a> and a really nice theme called <a href="https://github.com/schollz/onetwothree">onetwothree</a>. I&rsquo;m learning to use the framework properly and adding my own tooling to make the automated deployments more streamlined.</p>
-<p>So far I have a simple <code>Makefile</code> to sync submodules and run the local server</p>
-<div class="highlight"><pre class="chroma"><code class="language-makefile" data-lang="makefile"><span class="nf">sync-submodules</span><span class="o">:</span>
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="thoughts.theden.sh — Denis Khoshaba"><link rel="shortcut icon" href=https://thoughts.theden.sh/favicon.ico><link rel=stylesheet href=/css/style.min.css><title>Hello, World.</title><header id=banner><h2><a href=https://thoughts.theden.sh/>thoughts</a></h2><nav><ul><li><a href=/ title=posts>posts</a></ul></nav></header><main id=content><article><header id=post-header><h1>Hello, World.</h1><div><time>May 10, 2018</time></div></header><h1 id=welcome>Welcome</h1><p>This is my first post. I&rsquo;ve just set up <a href=https://github.com/gohugoio/hugo>Hugo</a> with <a href=https://www.netlify.com/>Netlify</a> and a really nice theme called <a href=https://github.com/schollz/onetwothree>onetwothree</a>. I&rsquo;m learning to use the framework properly and adding my own tooling to make the automated deployments more streamlined.<p>So far I have a simple <code>Makefile</code> to sync submodules and run the local server<div class=highlight><pre class=chroma><code class=language-makefile data-lang=makefile><span class=nf>sync-submodules</span><span class=o>:</span>
         git submodule sync
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">sync</span>-<span class="n">submodules</span>
+<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>sync</span>-<span class=n>submodules</span>
 
-<span class="nf">run-server</span><span class="o">:</span>
+<span class=nf>run-server</span><span class=o>:</span>
         hugo server
-<span class="nf">.PHONY</span><span class="o">:</span> <span class="n">run</span>-<span class="n">server</span>
-</code></pre></div><p>There does exist a <code>netlify</code> cli tool to do deployments, but doing a push to GitHub triggers builds anyway. Empty commits can also be done with <code>git commit --allow-empty</code> in case a push needs no change.</p>
-<p>One caveat is that the build cache may need to be cleared on Netlify, which is done via their service once logged in. If I run into this enough (more than twice would be enough), I&rsquo;ll add a <code>Makefile</code> target to clear it via their cli tool or API.</p>
-<p>You can check out the <a href="https://github.com/TheDen/thoughts.theden.sh">GitHub repo</a> if you want to see the setup as it progresses over time.</p>
-</article>
-
-        </main><footer id="footer">
-    
-</footer>
-</body>
-</html>
+<span class=nf>.PHONY</span><span class=o>:</span> <span class=n>run</span>-<span class=n>server</span>
+</code></pre></div><p>There does exist a <code>netlify</code> cli tool to do deployments, but doing a push to GitHub triggers builds anyway. Empty commits can also be done with <code>git commit --allow-empty</code> in case a push needs no change.<p>One caveat is that the build cache may need to be cleared on Netlify, which is done via their service once logged in. If I run into this enough (more than twice would be enough), I&rsquo;ll add a <code>Makefile</code> target to clear it via their cli tool or API.<p>You can check out the <a href=https://github.com/TheDen/thoughts.theden.sh>GitHub repo</a> if you want to see the setup as it progresses over time.</article></main><footer id=footer></footer>

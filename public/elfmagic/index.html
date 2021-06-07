@@ -1,166 +1,101 @@
-<!DOCTYPE html>
-<html><head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="thoughts.theden.sh — Denis Khoshaba">
-    
-    <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
-    
-    <link rel="stylesheet" href="/css/style.min.css">
-
-    <title>ELFs and magic in linux</title>
-</head>
-<body><header id="banner">
-    <h2><a href="https://thoughts.theden.sh/">thoughts</a></h2>
-    <nav>
-        <ul>
-            <li>
-                <a href="/" title="posts">posts</a>
-            </li>
-        </ul>
-    </nav>
-</header>
-<main id="content">
-<article>
-    <header id="post-header">
-        <h1>ELFs and magic in linux</h1>
-            <div>
-                <time>May 12, 2018</time>
-                </div>
-    </header><h2 id="motivation">Motivation</h2>
-<p>Lately I&rsquo;ve been interested in running arbitrary executables on AWS lambda, which often means using an existing static executable of a program, or building a statically linked executable. <a href="https://aws.amazon.com/blogs/compute/running-executables-in-aws-lambda/">However, a dynamically linked executable that run on Amazon&rsquo;s Linux</a> also <em>ought</em> to work on lambda.</p>
-<p>What&rsquo;s interesting is that <a href="https://www.akkadia.org/drepper/no_static_linking.html">static linking</a> <em>and</em>  <a href="http://harmful.cat-v.org/software/dynamic-linking/">dynamic</a> <a href="https://pdfs.semanticscholar.org/presentation/8cdf/e061c200e6a61d1757e11fdaae45bcb59a17.pdf">linking</a> have both in the past been considered harmful. <a href="https://meyerweb.com/eric/comment/chech.html">But we&rsquo;re not interested in that</a>.</p>
-<p>All this is a discussion for a different day—as a precursor, in this post we&rsquo;ll just play with <a href="https://en.wikipedia.org/wiki/Magic_number_%28programming%29">magic</a>.</p>
-<h2 id="inside-elfs">Inside ELFs</h2>
-<p>Let&rsquo;s use <code>df</code> as an example. Using <code>file</code> to run magic tests we can learn a few things about the executable</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ file <span class="k">$(</span>which df<span class="k">)</span>
-/bin/df: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>SYSV<span class="o">)</span>, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, <span class="k">for</span> GNU/Linux 2.6.32, BuildID<span class="o">[</span>sha1<span class="o">]=</span>0b3a8835cb66adac6ff3015859e2d7cccf805bbb, stripped
-</code></pre></div><p>We can use the tool <code>xxd</code> to do a hexdump of the header</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ xxd -l <span class="m">64</span> <span class="k">$(</span>which df<span class="k">)</span>
-00000000: 7f45 4c46 <span class="m">0201</span> <span class="m">0100</span> <span class="m">0000</span> <span class="m">0000</span> <span class="m">0000</span> <span class="m">0000</span>  .ELF............
-00000010: <span class="m">0200</span> 3e00 <span class="m">0100</span> <span class="m">0000</span> <span class="m">1036</span> <span class="m">4000</span> <span class="m">0000</span> <span class="m">0000</span>  ..&gt;......6@.....
-00000020: <span class="m">4000</span> <span class="m">0000</span> <span class="m">0000</span> <span class="m">0000</span> <span class="m">3877</span> <span class="m">0100</span> <span class="m">0000</span> <span class="m">0000</span>  @.......8w......
-00000030: <span class="m">0000</span> <span class="m">0000</span> <span class="m">4000</span> <span class="m">3800</span> <span class="m">0900</span> <span class="m">4000</span> 1d00 1c00  ....@.8...@.....
-</code></pre></div><p>(The <code>-l</code> flag is used to limit the output length since the <code>ELF</code> header is 64 bytes for 64-bit executables.)</p>
-<p>Now what do these values mean? We can have a look at <code>elf.h</code> <a href="https://github.com/torvalds/linux/blob/master/include/uapi/linux/elf.h">from the  linux kernel</a>—the 64-bit header&rsquo;s described as</p>
-<div class="highlight"><pre class="chroma"><code class="language-C" data-lang="C"><span class="k">typedef</span> <span class="k">struct</span> <span class="n">elf64_hdr</span> <span class="p">{</span>
-  <span class="kt">unsigned</span> <span class="kt">char</span>    <span class="n">e_ident</span><span class="p">[</span><span class="n">EI_NIDENT</span><span class="p">];</span>    <span class="cm">/* ELF &#34;magic number&#34; */</span>
-  <span class="n">Elf64_Half</span> <span class="n">e_type</span><span class="p">;</span>
-  <span class="n">Elf64_Half</span> <span class="n">e_machine</span><span class="p">;</span>
-  <span class="n">Elf64_Word</span> <span class="n">e_version</span><span class="p">;</span>
-  <span class="n">Elf64_Addr</span> <span class="n">e_entry</span><span class="p">;</span>        <span class="cm">/* Entry point virtual address */</span>
-  <span class="n">Elf64_Off</span> <span class="n">e_phoff</span><span class="p">;</span>        <span class="cm">/* Program header table file offset */</span>
-  <span class="n">Elf64_Off</span> <span class="n">e_shoff</span><span class="p">;</span>        <span class="cm">/* Section header table file offset */</span>
-  <span class="n">Elf64_Word</span> <span class="n">e_flags</span><span class="p">;</span>
-  <span class="n">Elf64_Half</span> <span class="n">e_ehsize</span><span class="p">;</span>
-  <span class="n">Elf64_Half</span> <span class="n">e_phentsize</span><span class="p">;</span>
-  <span class="n">Elf64_Half</span> <span class="n">e_phnum</span><span class="p">;</span>
-  <span class="n">Elf64_Half</span> <span class="n">e_shentsize</span><span class="p">;</span>
-  <span class="n">Elf64_Half</span> <span class="n">e_shnum</span><span class="p">;</span>
-  <span class="n">Elf64_Half</span> <span class="n">e_shstrndx</span><span class="p">;</span>
-<span class="p">}</span> <span class="n">Elf64_Ehdr</span><span class="p">;</span>
-</code></pre></div><p>the <a href="http://man7.org/linux/man-pages/man5/elf.5.html">manpage for elf</a> has a good description of each—one example</p>
-<pre><code>e_machine: This member specifies the required architecture for an individual file
-</code></pre><p>and in our case, it&rsquo;s <code>0x3e</code> for <code>x86-64</code>. <a href="http://refspecs.linuxbase.org/">linuxbase.org&rsquo;s specs</a>, specifically for <a href="http://refspecs.linuxbase.org/elf/gabi4+/ch4.eheader.html">ELF</a> is particularly useful for understanding what&rsquo;s what.</p>
-<p>What&rsquo;s interesting is that the ABI value in the magic output of <code>df</code> above shows <code>SYSV</code>, which corresponds to <code>0x00</code> for <code>e_ident[EI_OSABI]</code>, even though there is a <code>Linux</code> ABI value (<code>0x03</code>). Linuxbase.org explains why this is the case</p>
-<blockquote>
-<p>If the object file does not use any extensions, it is recommended that this byte be set to <code>0</code></p>
-</blockquote>
-<p>We&rsquo;ll play with setting different values next.</p>
-<h2 id="crafting-a-header">Crafting a Header</h2>
-<p>Let&rsquo;s hack together an ELF header. A <em>really</em> useful tool for displaying information about ELF files is <code>readelf</code>. For example running <code>readelf -a $(which df)</code> will give a wealth of information. Of course, it only works on ELF files</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ cat /dev/urandom <span class="p">|</span> base64 <span class="p">|</span> head -c <span class="m">64</span> &gt; textfile <span class="o">&amp;&amp;</span> readelf -a textfile
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="thoughts.theden.sh — Denis Khoshaba"><link rel="shortcut icon" href=https://thoughts.theden.sh/favicon.ico><link rel=stylesheet href=/css/style.min.css><title>ELFs and magic in linux</title><header id=banner><h2><a href=https://thoughts.theden.sh/>thoughts</a></h2><nav><ul><li><a href=/ title=posts>posts</a></ul></nav></header><main id=content><article><header id=post-header><h1>ELFs and magic in linux</h1><div><time>May 12, 2018</time></div></header><h2 id=motivation>Motivation</h2><p>Lately I&rsquo;ve been interested in running arbitrary executables on AWS lambda, which often means using an existing static executable of a program, or building a statically linked executable. <a href=https://aws.amazon.com/blogs/compute/running-executables-in-aws-lambda/>However, a dynamically linked executable that run on Amazon&rsquo;s Linux</a> also <em>ought</em> to work on lambda.<p>What&rsquo;s interesting is that <a href=https://www.akkadia.org/drepper/no_static_linking.html>static linking</a> <em>and</em> <a href=http://harmful.cat-v.org/software/dynamic-linking/>dynamic</a> <a href=https://pdfs.semanticscholar.org/presentation/8cdf/e061c200e6a61d1757e11fdaae45bcb59a17.pdf>linking</a> have both in the past been considered harmful. <a href=https://meyerweb.com/eric/comment/chech.html>But we&rsquo;re not interested in that</a>.<p>All this is a discussion for a different day—as a precursor, in this post we&rsquo;ll just play with <a href=https://en.wikipedia.org/wiki/Magic_number_%28programming%29>magic</a>.<h2 id=inside-elfs>Inside ELFs</h2><p>Let&rsquo;s use <code>df</code> as an example. Using <code>file</code> to run magic tests we can learn a few things about the executable<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ file <span class=k>$(</span>which df<span class=k>)</span>
+/bin/df: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>SYSV<span class=o>)</span>, dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, <span class=k>for</span> GNU/Linux 2.6.32, BuildID<span class=o>[</span>sha1<span class=o>]=</span>0b3a8835cb66adac6ff3015859e2d7cccf805bbb, stripped
+</code></pre></div><p>We can use the tool <code>xxd</code> to do a hexdump of the header<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ xxd -l <span class=m>64</span> <span class=k>$(</span>which df<span class=k>)</span>
+00000000: 7f45 4c46 <span class=m>0201</span> <span class=m>0100</span> <span class=m>0000</span> <span class=m>0000</span> <span class=m>0000</span> <span class=m>0000</span>  .ELF............
+00000010: <span class=m>0200</span> 3e00 <span class=m>0100</span> <span class=m>0000</span> <span class=m>1036</span> <span class=m>4000</span> <span class=m>0000</span> <span class=m>0000</span>  ..&gt;......6@.....
+00000020: <span class=m>4000</span> <span class=m>0000</span> <span class=m>0000</span> <span class=m>0000</span> <span class=m>3877</span> <span class=m>0100</span> <span class=m>0000</span> <span class=m>0000</span>  @.......8w......
+00000030: <span class=m>0000</span> <span class=m>0000</span> <span class=m>4000</span> <span class=m>3800</span> <span class=m>0900</span> <span class=m>4000</span> 1d00 1c00  ....@.8...@.....
+</code></pre></div><p>(The <code>-l</code> flag is used to limit the output length since the <code>ELF</code> header is 64 bytes for 64-bit executables.)<p>Now what do these values mean? We can have a look at <code>elf.h</code> <a href=https://github.com/torvalds/linux/blob/master/include/uapi/linux/elf.h>from the linux kernel</a>—the 64-bit header&rsquo;s described as<div class=highlight><pre class=chroma><code class=language-C data-lang=C><span class=k>typedef</span> <span class=k>struct</span> <span class=n>elf64_hdr</span> <span class=p>{</span>
+  <span class=kt>unsigned</span> <span class=kt>char</span>    <span class=n>e_ident</span><span class=p>[</span><span class=n>EI_NIDENT</span><span class=p>];</span>    <span class=cm>/* ELF &#34;magic number&#34; */</span>
+  <span class=n>Elf64_Half</span> <span class=n>e_type</span><span class=p>;</span>
+  <span class=n>Elf64_Half</span> <span class=n>e_machine</span><span class=p>;</span>
+  <span class=n>Elf64_Word</span> <span class=n>e_version</span><span class=p>;</span>
+  <span class=n>Elf64_Addr</span> <span class=n>e_entry</span><span class=p>;</span>        <span class=cm>/* Entry point virtual address */</span>
+  <span class=n>Elf64_Off</span> <span class=n>e_phoff</span><span class=p>;</span>        <span class=cm>/* Program header table file offset */</span>
+  <span class=n>Elf64_Off</span> <span class=n>e_shoff</span><span class=p>;</span>        <span class=cm>/* Section header table file offset */</span>
+  <span class=n>Elf64_Word</span> <span class=n>e_flags</span><span class=p>;</span>
+  <span class=n>Elf64_Half</span> <span class=n>e_ehsize</span><span class=p>;</span>
+  <span class=n>Elf64_Half</span> <span class=n>e_phentsize</span><span class=p>;</span>
+  <span class=n>Elf64_Half</span> <span class=n>e_phnum</span><span class=p>;</span>
+  <span class=n>Elf64_Half</span> <span class=n>e_shentsize</span><span class=p>;</span>
+  <span class=n>Elf64_Half</span> <span class=n>e_shnum</span><span class=p>;</span>
+  <span class=n>Elf64_Half</span> <span class=n>e_shstrndx</span><span class=p>;</span>
+<span class=p>}</span> <span class=n>Elf64_Ehdr</span><span class=p>;</span>
+</code></pre></div><p>the <a href=http://man7.org/linux/man-pages/man5/elf.5.html>manpage for elf</a> has a good description of each—one example<pre><code>e_machine: This member specifies the required architecture for an individual file
+</code></pre><p>and in our case, it&rsquo;s <code>0x3e</code> for <code>x86-64</code>. <a href=http://refspecs.linuxbase.org/>linuxbase.org&rsquo;s specs</a>, specifically for <a href=http://refspecs.linuxbase.org/elf/gabi4+/ch4.eheader.html>ELF</a> is particularly useful for understanding what&rsquo;s what.<p>What&rsquo;s interesting is that the ABI value in the magic output of <code>df</code> above shows <code>SYSV</code>, which corresponds to <code>0x00</code> for <code>e_ident[EI_OSABI]</code>, even though there is a <code>Linux</code> ABI value (<code>0x03</code>). Linuxbase.org explains why this is the case<blockquote><p>If the object file does not use any extensions, it is recommended that this byte be set to <code>0</code></blockquote><p>We&rsquo;ll play with setting different values next.<h2 id=crafting-a-header>Crafting a Header</h2><p>Let&rsquo;s hack together an ELF header. A <em>really</em> useful tool for displaying information about ELF files is <code>readelf</code>. For example running <code>readelf -a $(which df)</code> will give a wealth of information. Of course, it only works on ELF files<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ cat /dev/urandom <span class=p>|</span> base64 <span class=p>|</span> head -c <span class=m>64</span> &gt; textfile <span class=o>&amp;&amp;</span> readelf -a textfile
 readelf: Error: Not an ELF file - it has the wrong magic bytes at the start
-</code></pre></div><p>However we can rip <code>df</code>&rsquo;s header and construct an ELF file,</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ xxd -p -l <span class="m">64</span> -c <span class="m">64</span> <span class="k">$(</span>which df<span class="k">)</span> <span class="c1"># Output the first 64 bytes</span>
+</code></pre></div><p>However we can rip <code>df</code>&rsquo;s header and construct an ELF file,<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ xxd -p -l <span class=m>64</span> -c <span class=m>64</span> <span class=k>$(</span>which df<span class=k>)</span> <span class=c1># Output the first 64 bytes</span>
 7f454c4602010100000000000000000002003e00010000001036400000000000400000000000000038770100000000000000000040003800090040001d001c00
 
-$ perl -e <span class="s1">&#39;print pack &#34;H*&#34;, &#34;7f454c4602010100000000000000000002003e00010000001036400000000000400000000000000038770100000000000000000040003800090040001d001c00&#34;&#39;</span> &gt; newfile <span class="c1"># Create a file with the same header</span>
+$ perl -e <span class=s1>&#39;print pack &#34;H*&#34;, &#34;7f454c4602010100000000000000000002003e00010000001036400000000000400000000000000038770100000000000000000040003800090040001d001c00&#34;&#39;</span> &gt; newfile <span class=c1># Create a file with the same header</span>
 
 
 $ file newfile
-newfile: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>SYSV<span class="o">)</span>
+newfile: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>SYSV<span class=o>)</span>
 
 $ xxd newfile
-00000000: 7f45 4c46 <span class="m">0201</span> <span class="m">0100</span> <span class="m">0000</span> <span class="m">0000</span> <span class="m">0000</span> <span class="m">0000</span>  .ELF............
-00000010: <span class="m">0200</span> 3e00 <span class="m">0100</span> <span class="m">0000</span> <span class="m">1036</span> <span class="m">4000</span> <span class="m">0000</span> <span class="m">0000</span>  ..&gt;......6@.....
-00000020: <span class="m">4000</span> <span class="m">0000</span> <span class="m">0000</span> <span class="m">0000</span> <span class="m">3877</span> <span class="m">0100</span> <span class="m">0000</span> <span class="m">0000</span>  @.......8w......
-00000030: <span class="m">0000</span> <span class="m">0000</span> <span class="m">4000</span> <span class="m">3800</span> <span class="m">0900</span> <span class="m">4000</span> 1d00 1c00  ....@.8...@.....
-</code></pre></div><p>Now <code>readelf</code> should work (with some errors since we only copied the file header)</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ readelf -a newfile
+00000000: 7f45 4c46 <span class=m>0201</span> <span class=m>0100</span> <span class=m>0000</span> <span class=m>0000</span> <span class=m>0000</span> <span class=m>0000</span>  .ELF............
+00000010: <span class=m>0200</span> 3e00 <span class=m>0100</span> <span class=m>0000</span> <span class=m>1036</span> <span class=m>4000</span> <span class=m>0000</span> <span class=m>0000</span>  ..&gt;......6@.....
+00000020: <span class=m>4000</span> <span class=m>0000</span> <span class=m>0000</span> <span class=m>0000</span> <span class=m>3877</span> <span class=m>0100</span> <span class=m>0000</span> <span class=m>0000</span>  @.......8w......
+00000030: <span class=m>0000</span> <span class=m>0000</span> <span class=m>4000</span> <span class=m>3800</span> <span class=m>0900</span> <span class=m>4000</span> 1d00 1c00  ....@.8...@.....
+</code></pre></div><p>Now <code>readelf</code> should work (with some errors since we only copied the file header)<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ readelf -a newfile
 ELF Header:
-  Magic:   7f <span class="m">45</span> 4c <span class="m">46</span> <span class="m">02</span> <span class="m">01</span> <span class="m">01</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>
+  Magic:   7f <span class=m>45</span> 4c <span class=m>46</span> <span class=m>02</span> <span class=m>01</span> <span class=m>01</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span>
   Class:                             ELF64
-  Data:                              2<span class="err">&#39;</span>s complement, little endian
-  Version:                           <span class="m">1</span> <span class="o">(</span>current<span class="o">)</span>
+  Data:                              2<span class=err>&#39;</span>s complement, little endian
+  Version:                           <span class=m>1</span> <span class=o>(</span>current<span class=o>)</span>
   OS/ABI:                            UNIX - System V
-  ABI Version:                       <span class="m">0</span>
-  Type:                              EXEC <span class="o">(</span>Executable file<span class="o">)</span>
+  ABI Version:                       <span class=m>0</span>
+  Type:                              EXEC <span class=o>(</span>Executable file<span class=o>)</span>
   Machine:                           Advanced Micro Devices X86-64
   Version:                           0x1
   Entry point address:               0x403610
-  Start of program headers:          <span class="m">64</span> <span class="o">(</span>bytes into file<span class="o">)</span>
-  Start of section headers:          <span class="m">96056</span> <span class="o">(</span>bytes into file<span class="o">)</span>
+  Start of program headers:          <span class=m>64</span> <span class=o>(</span>bytes into file<span class=o>)</span>
+  Start of section headers:          <span class=m>96056</span> <span class=o>(</span>bytes into file<span class=o>)</span>
   Flags:                             0x0
-  Size of this header:               <span class="m">64</span> <span class="o">(</span>bytes<span class="o">)</span>
-  Size of program headers:           <span class="m">56</span> <span class="o">(</span>bytes<span class="o">)</span>
-  Number of program headers:         <span class="m">9</span>
-  Size of section headers:           <span class="m">64</span> <span class="o">(</span>bytes<span class="o">)</span>
-  Number of section headers:         <span class="m">29</span>
-  Section header string table index: <span class="m">28</span>
-readelf: Error: Reading 0x740 bytes extends past end of file <span class="k">for</span> section headers
+  Size of this header:               <span class=m>64</span> <span class=o>(</span>bytes<span class=o>)</span>
+  Size of program headers:           <span class=m>56</span> <span class=o>(</span>bytes<span class=o>)</span>
+  Number of program headers:         <span class=m>9</span>
+  Size of section headers:           <span class=m>64</span> <span class=o>(</span>bytes<span class=o>)</span>
+  Number of section headers:         <span class=m>29</span>
+  Section header string table index: <span class=m>28</span>
+readelf: Error: Reading 0x740 bytes extends past end of file <span class=k>for</span> section headers
 readelf: Error: Section headers are not available!
-readelf: Error: Reading 0x1f8 bytes extends past end of file <span class="k">for</span> program headers
-readelf: Error: Reading 0x1f8 bytes extends past end of file <span class="k">for</span> program headers
-</code></pre></div><p>we can also play around with how the data is stacked</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ <span class="nb">echo</span> <span class="s2">&#34;hello, world&#34;</span> &gt;&gt; newfile
+readelf: Error: Reading 0x1f8 bytes extends past end of file <span class=k>for</span> program headers
+readelf: Error: Reading 0x1f8 bytes extends past end of file <span class=k>for</span> program headers
+</code></pre></div><p>we can also play around with how the data is stacked<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ <span class=nb>echo</span> <span class=s2>&#34;hello, world&#34;</span> &gt;&gt; newfile
 
-$ file newfile <span class="c1"># Now file returns an error</span>
-newfile: ERROR: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>SYSV<span class="o">)</span> error reading
+$ file newfile <span class=c1># Now file returns an error</span>
+newfile: ERROR: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>SYSV<span class=o>)</span> error reading
 
 $ cat newfile
 ELF&gt;6@@8w@8     @hello, world
 
-$ cat newfile <span class="p">|</span> cut -b 64- <span class="c1"># Strip out the header</span>
+$ cat newfile <span class=p>|</span> cut -b 64- <span class=c1># Strip out the header</span>
 hello, world
-</code></pre></div><p>As discussed earlier, we can set we can set <code>e_ident[EI_OSABI]</code> to <code>0x03</code> to make it show linux</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ perl -e <span class="s1">&#39;print pack &#34;H*&#34;, &#34;7f454c4602010103000000000000000002003e00010000001036400000000000400000000000000038770100000000000000000040003800090040001d001c00&#34;&#39;</span> <span class="p">|</span> file -
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>GNU/Linux<span class="o">)</span>
-</code></pre></div><p>Though as we learned from the spec, it&rsquo;s not recommended. We can also iterate through the values to <code>0x11</code> to see what outputs we get from <code>file</code></p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ <span class="k">for</span> i in <span class="k">$(</span>seq --format<span class="o">=</span><span class="s2">&#34;%02.f&#34;</span> <span class="m">0</span> 11<span class="k">)</span><span class="p">;</span> <span class="k">do</span> <span class="nb">echo</span> <span class="s2">&#34;print pack \&#34;H*\&#34;, \&#34;7f454c46020101</span><span class="si">${</span><span class="nv">i</span><span class="si">}</span><span class="s2">000000000000000002003e00010000001036400000000000400000000000000038770100000000000000000040003800090040001d001c00\&#34;&#34;</span> <span class="p">|</span> perl <span class="p">|</span> file - <span class="p">;</span> <span class="k">done</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>SYSV<span class="o">)</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>HP-UX<span class="o">)</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>NetBSD<span class="o">)</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>GNU/Linux<span class="o">)</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>GNU/Hurd<span class="o">)</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>86Open<span class="o">)</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>Solaris<span class="o">)</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>Monterey<span class="o">)</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>IRIX<span class="o">)</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span> <span class="o">(</span>FreeBSD<span class="o">)</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span>
-/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class="m">1</span>
-</code></pre></div><p>Next we&rsquo;ll go into more detail on how this all works.</p>
-<h2 id="magic-files">Magic Files</h2>
-<p>The <code>file</code> tool depends <code>.mgc</code> binaries to work. Usually located in <code>/usr/local/share/misc/magic.mgc</code>, magic files are databases of tests, typically containing so-called &ldquo;magic patterns&rdquo;.</p>
-<p>You can quickly (or lazily) locate where the <code>.mgc</code> file is with <code>strace</code></p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ strace file <span class="k">$(</span>which df<span class="k">)</span> 2&gt;<span class="p">&amp;</span><span class="m">1</span> <span class="p">|</span> grep magic.mgc
-stat<span class="o">(</span><span class="s2">&#34;/home/ubuntu/.magic.mgc&#34;</span>, 0x7ffc9771ead0<span class="o">)</span> <span class="o">=</span> -1 ENOENT <span class="o">(</span>No such file or directory<span class="o">)</span>
-open<span class="o">(</span><span class="s2">&#34;/etc/magic.mgc&#34;</span>, O_RDONLY<span class="o">)</span>        <span class="o">=</span> -1 ENOENT <span class="o">(</span>No such file or directory<span class="o">)</span>
-open<span class="o">(</span><span class="s2">&#34;/usr/share/misc/magic.mgc&#34;</span>, O_RDONLY<span class="o">)</span> <span class="o">=</span> <span class="m">3</span>
-</code></pre></div><p>This tells us a two things</p>
-<ul>
-<li>Our magic file is located in <code>/usr/share/misc/magic.mgc</code></li>
-<li><code>file</code> first looked for <code>/home/ubuntu/.magic.mgc</code> for a magic file, then <code>/etc/magic.mgc</code></li>
-</ul>
-<p>the <a href="http://man7.org/linux/man-pages/man1/file.1.html">manpage for <code>file</code></a> confirms this</p>
-<pre><code class="language-manpage" data-lang="manpage">The information identifying these files is read from /etc/magic and the compiled magic file /usr/share/misc/magic.mgc, or the files in the directory /usr/share/misc/magic if the compiled file does not exist.  In addition, if $HOME/.magic.mgc or $HOME/.magic exists, it will be used in preference to the system magic files.
-</code></pre><p>Interestingly, <code>/usr/share/misc/magic.mgc</code> is a symbolic link</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ ls -l /usr/share/misc/magic.mgc
-lrwxrwxrwx <span class="m">1</span> root root <span class="m">17</span> Nov <span class="m">20</span>  <span class="m">2015</span> /usr/share/misc/magic.mgc -&gt; ../file/magic.mgc
-</code></pre></div><p>(If you want to a list of patterns used for matching, and their strength sorted descending run <code>file -l</code>)</p>
-<p>To understand how magic these files work, we can look at a section of the <a href="https://github.com/file/file/blob/master/magic/Magdir/elf">magic file for ELFs</a></p>
-<pre><code class="language-magic" data-lang="magic">0	string		\177ELF		ELF
+</code></pre></div><p>As discussed earlier, we can set we can set <code>e_ident[EI_OSABI]</code> to <code>0x03</code> to make it show linux<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ perl -e <span class=s1>&#39;print pack &#34;H*&#34;, &#34;7f454c4602010103000000000000000002003e00010000001036400000000000400000000000000038770100000000000000000040003800090040001d001c00&#34;&#39;</span> <span class=p>|</span> file -
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>GNU/Linux<span class=o>)</span>
+</code></pre></div><p>Though as we learned from the spec, it&rsquo;s not recommended. We can also iterate through the values to <code>0x11</code> to see what outputs we get from <code>file</code><div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ <span class=k>for</span> i in <span class=k>$(</span>seq --format<span class=o>=</span><span class=s2>&#34;%02.f&#34;</span> <span class=m>0</span> 11<span class=k>)</span><span class=p>;</span> <span class=k>do</span> <span class=nb>echo</span> <span class=s2>&#34;print pack \&#34;H*\&#34;, \&#34;7f454c46020101</span><span class=si>${</span><span class=nv>i</span><span class=si>}</span><span class=s2>000000000000000002003e00010000001036400000000000400000000000000038770100000000000000000040003800090040001d001c00\&#34;&#34;</span> <span class=p>|</span> perl <span class=p>|</span> file - <span class=p>;</span> <span class=k>done</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>SYSV<span class=o>)</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>HP-UX<span class=o>)</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>NetBSD<span class=o>)</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>GNU/Linux<span class=o>)</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>GNU/Hurd<span class=o>)</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>86Open<span class=o>)</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>Solaris<span class=o>)</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>Monterey<span class=o>)</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>IRIX<span class=o>)</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span> <span class=o>(</span>FreeBSD<span class=o>)</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span>
+/dev/stdin: ELF 64-bit LSB executable, x86-64, version <span class=m>1</span>
+</code></pre></div><p>Next we&rsquo;ll go into more detail on how this all works.<h2 id=magic-files>Magic Files</h2><p>The <code>file</code> tool depends <code>.mgc</code> binaries to work. Usually located in <code>/usr/local/share/misc/magic.mgc</code>, magic files are databases of tests, typically containing so-called &ldquo;magic patterns&rdquo;.<p>You can quickly (or lazily) locate where the <code>.mgc</code> file is with <code>strace</code><div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ strace file <span class=k>$(</span>which df<span class=k>)</span> 2&gt;<span class=p>&amp;</span><span class=m>1</span> <span class=p>|</span> grep magic.mgc
+stat<span class=o>(</span><span class=s2>&#34;/home/ubuntu/.magic.mgc&#34;</span>, 0x7ffc9771ead0<span class=o>)</span> <span class=o>=</span> -1 ENOENT <span class=o>(</span>No such file or directory<span class=o>)</span>
+open<span class=o>(</span><span class=s2>&#34;/etc/magic.mgc&#34;</span>, O_RDONLY<span class=o>)</span>        <span class=o>=</span> -1 ENOENT <span class=o>(</span>No such file or directory<span class=o>)</span>
+open<span class=o>(</span><span class=s2>&#34;/usr/share/misc/magic.mgc&#34;</span>, O_RDONLY<span class=o>)</span> <span class=o>=</span> <span class=m>3</span>
+</code></pre></div><p>This tells us a two things<ul><li>Our magic file is located in <code>/usr/share/misc/magic.mgc</code><li><code>file</code> first looked for <code>/home/ubuntu/.magic.mgc</code> for a magic file, then <code>/etc/magic.mgc</code></ul><p>the <a href=http://man7.org/linux/man-pages/man1/file.1.html>manpage for <code>file</code></a> confirms this<pre><code class=language-manpage data-lang=manpage>The information identifying these files is read from /etc/magic and the compiled magic file /usr/share/misc/magic.mgc, or the files in the directory /usr/share/misc/magic if the compiled file does not exist.  In addition, if $HOME/.magic.mgc or $HOME/.magic exists, it will be used in preference to the system magic files.
+</code></pre><p>Interestingly, <code>/usr/share/misc/magic.mgc</code> is a symbolic link<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ ls -l /usr/share/misc/magic.mgc
+lrwxrwxrwx <span class=m>1</span> root root <span class=m>17</span> Nov <span class=m>20</span>  <span class=m>2015</span> /usr/share/misc/magic.mgc -&gt; ../file/magic.mgc
+</code></pre></div><p>(If you want to a list of patterns used for matching, and their strength sorted descending run <code>file -l</code>)<p>To understand how magic these files work, we can look at a section of the <a href=https://github.com/file/file/blob/master/magic/Magdir/elf>magic file for ELFs</a><pre><code class=language-magic data-lang=magic>0	string		\177ELF		ELF
 !:strength *2
 &gt;4	byte		0		invalid class
 &gt;4	byte		1		32-bit
@@ -190,25 +125,15 @@ lrwxrwxrwx <span class="m">1</span> root root <span class="m">17</span> Nov <spa
 &gt;7	byte		17		(Nuxi CloudABI)
 &gt;7	byte		97		(ARM)
 &gt;7 byte 255 (embedded)
-</code></pre><p>(The <code>!:strength *2</code> line is a multiplier on the computed magic strength)</p>
-<p>Let&rsquo;s break it down:</p>
-<ul>
-<li>The first field is the byte offset</li>
-<li><code>&gt;</code> or <code>&amp;</code> at the beginning of lines means it&rsquo;s a continuation from previous entry</li>
-<li><code>use</code> recursively calls the named magic starting from the current offset. The <code>\^</code> means endianness is switched</li>
-<li>The second field is the type—in the case of ELF the first is a string to test for <code>\177ELF</code>, and the others are <code>byte</code> that check for one-byte values.</li>
-</ul>
-<p>Let&rsquo;s break down the ELF header from what we built before using the ELF magic file as reference</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">7f <span class="m">45</span> 4c <span class="m">46</span> <span class="m">02</span> <span class="m">01</span> <span class="m">01</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span> <span class="m">00</span>
-</code></pre></div><div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="se">\1</span><span class="m">77</span> <span class="o">(</span>octal 177<span class="o">)</span> <span class="o">==</span> <span class="s2">&#34;7f&#34;</span> <span class="o">(</span>0<span class="o">)</span>
-<span class="m">45</span> 4c <span class="nv">46</span> <span class="o">==</span>  <span class="s2">&#34;ELF&#34;</span> <span class="o">(</span>0<span class="o">)</span>
-<span class="nv">02</span> <span class="o">==</span> <span class="s2">&#34;64-bit&#34;</span> <span class="o">(</span>&gt;4<span class="o">)</span>
-<span class="nv">01</span> <span class="o">==</span> <span class="s2">&#34;1 to signify little endianness&#34;</span> <span class="o">(</span>&gt;5<span class="o">)</span>
-<span class="nv">01</span> <span class="o">==</span> <span class="s2">&#34;Recall value is e_ident[EI_VERSION] to set original ELF version&#34;</span> <span class="o">(</span>&gt;6<span class="o">)</span>
-<span class="nv">00</span> <span class="o">==</span> <span class="s2">&#34;ABI value — SYSV in this case&#34;</span> <span class="o">(</span>&gt;7<span class="o">)</span>
+</code></pre><p>(The <code>!:strength *2</code> line is a multiplier on the computed magic strength)<p>Let&rsquo;s break it down:<ul><li>The first field is the byte offset<li><code>></code> or <code>&</code> at the beginning of lines means it&rsquo;s a continuation from previous entry<li><code>use</code> recursively calls the named magic starting from the current offset. The <code>\^</code> means endianness is switched<li>The second field is the type—in the case of ELF the first is a string to test for <code>\177ELF</code>, and the others are <code>byte</code> that check for one-byte values.</ul><p>Let&rsquo;s break down the ELF header from what we built before using the ELF magic file as reference<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>7f <span class=m>45</span> 4c <span class=m>46</span> <span class=m>02</span> <span class=m>01</span> <span class=m>01</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span> <span class=m>00</span>
+</code></pre></div><div class=highlight><pre class=chroma><code class=language-bash data-lang=bash><span class=se>\1</span><span class=m>77</span> <span class=o>(</span>octal 177<span class=o>)</span> <span class=o>==</span> <span class=s2>&#34;7f&#34;</span> <span class=o>(</span>0<span class=o>)</span>
+<span class=m>45</span> 4c <span class=nv>46</span> <span class=o>==</span>  <span class=s2>&#34;ELF&#34;</span> <span class=o>(</span>0<span class=o>)</span>
+<span class=nv>02</span> <span class=o>==</span> <span class=s2>&#34;64-bit&#34;</span> <span class=o>(</span>&gt;4<span class=o>)</span>
+<span class=nv>01</span> <span class=o>==</span> <span class=s2>&#34;1 to signify little endianness&#34;</span> <span class=o>(</span>&gt;5<span class=o>)</span>
+<span class=nv>01</span> <span class=o>==</span> <span class=s2>&#34;Recall value is e_ident[EI_VERSION] to set original ELF version&#34;</span> <span class=o>(</span>&gt;6<span class=o>)</span>
+<span class=nv>00</span> <span class=o>==</span> <span class=s2>&#34;ABI value — SYSV in this case&#34;</span> <span class=o>(</span>&gt;7<span class=o>)</span>
 </code></pre></div><p>As a bonus, you can see how shells and interpreters are matched with <code>file</code> by having a look at their magic files.
-For example with <a href="https://github.com/file/file/blob/master/magic/Magdir/commands">bash</a> and <a href="https://github.com/file/file/blob/master/magic/Magdir/python">python</a> for shebangs</p>
-<pre><code class="language-magic" data-lang="magic">0	string/wt	#!\ /bin/bash	Bourne-Again shell script text executable
+For example with <a href=https://github.com/file/file/blob/master/magic/Magdir/commands>bash</a> and <a href=https://github.com/file/file/blob/master/magic/Magdir/python>python</a> for shebangs<pre><code class=language-magic data-lang=magic>0	string/wt	#!\ /bin/bash	Bourne-Again shell script text executable
 !:mime text/x-shellscript
 
 0	search/1/w	#!\ /usr/bin/python	Python script text executable
@@ -219,35 +144,20 @@ For example with <a href="https://github.com/file/file/blob/master/magic/Magdir/
 0	regex		\^from[\040\t\f\r\n]+([A-Za-z0-9_]|\\.)+[\040\t\f\r\n]+import.*$	Python script text executable
 !:strength + 15
 !:mime text/x-python
-</code></pre><p>Where <code>search/N</code> which indicates to search for the string indicated in the next field up to <code>N</code> byes from the offset. For mimes, I&rsquo;m going to refer to the manpage since they explain it succinctly</p>
-<pre><code class="language-manpage" data-lang="manpage">A MIME type is given on a separate line, which must be the next non-blank or comment line after the magic line that identifies the file type, and has the following format:
+</code></pre><p>Where <code>search/N</code> which indicates to search for the string indicated in the next field up to <code>N</code> byes from the offset. For mimes, I&rsquo;m going to refer to the manpage since they explain it succinctly<pre><code class=language-manpage data-lang=manpage>A MIME type is given on a separate line, which must be the next non-blank or comment line after the magic line that identifies the file type, and has the following format:
 
            !:mime  MIMETYPE
-</code></pre><h2 id="custom-magic">Custom magic</h2>
-<p>Knowing what we know now, let&rsquo;s make our own trivial magic file. Say I want to use the <a href="https://fishshell.com/">fish shell</a> and want my <code>fish</code> scripts to have their own shebang that gets recognised by <code>file</code>.</p>
-<p>Let&rsquo;s make a fish script</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ <span class="nb">printf</span> <span class="s1">&#39;#!/usr/bin/fish\necho &#34;hello world&#34;\n&#39;</span> &gt; script.fish
+</code></pre><h2 id=custom-magic>Custom magic</h2><p>Knowing what we know now, let&rsquo;s make our own trivial magic file. Say I want to use the <a href=https://fishshell.com/>fish shell</a> and want my <code>fish</code> scripts to have their own shebang that gets recognised by <code>file</code>.<p>Let&rsquo;s make a fish script<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ <span class=nb>printf</span> <span class=s1>&#39;#!/usr/bin/fish\necho &#34;hello world&#34;\n&#39;</span> &gt; script.fish
 $ cat script.fish
-<span class="c1">#!/usr/bin/fish</span>
-<span class="nb">echo</span> <span class="s2">&#34;hello world&#34;</span>
-</code></pre></div><p>Creating a magic file</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ <span class="nb">printf</span> <span class="s1">&#39;0   search/1/w     #!\ /usr/bin/fish     fish shell script text executable\n!:mime  text/x-fishscript\n&#39;</span> &gt; <span class="nv">$HOME</span>/.magic.mgc
+<span class=c1>#!/usr/bin/fish</span>
+<span class=nb>echo</span> <span class=s2>&#34;hello world&#34;</span>
+</code></pre></div><p>Creating a magic file<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ <span class=nb>printf</span> <span class=s1>&#39;0   search/1/w     #!\ /usr/bin/fish     fish shell script text executable\n!:mime  text/x-fishscript\n&#39;</span> &gt; <span class=nv>$HOME</span>/.magic.mgc
 
-$ cat <span class="nv">$HOME</span>/.magic.mgc
-<span class="m">0</span>   search/1/w     <span class="c1">#!\ /usr/bin/fish     fish shell script text executable</span>
+$ cat <span class=nv>$HOME</span>/.magic.mgc
+<span class=m>0</span>   search/1/w     <span class=c1>#!\ /usr/bin/fish     fish shell script text executable</span>
 !:mime  text/x-fishscript
-</code></pre></div><p>then running file</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ file script.fish
+</code></pre></div><p>then running file<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ file script.fish
 script.fish: fish shell script, ASCII text executable
-</code></pre></div><p>checking the mime</p>
-<div class="highlight"><pre class="chroma"><code class="language-shell" data-lang="shell">$ file script.fish --mime
-script.fish: text/x-fishscript<span class="p">;</span> <span class="nv">charset</span><span class="o">=</span>us-ascii
-</code></pre></div><p>Pretty neat!</p>
-<p>That&rsquo;s it for now. If you want to make something more complicated <a href="https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.bpxa500/mgc.htm">IBM&rsquo;s Knowledge Center</a> has some easy to read information on magic files (and of course there&rsquo;s always the <a href="https://linux.die.net/man/5/magic">manpage for magic</a>).</p>
-</article>
-
-        </main><footer id="footer">
-    
-</footer>
-</body>
-</html>
+</code></pre></div><p>checking the mime<div class=highlight><pre class=chroma><code class=language-shell data-lang=shell>$ file script.fish --mime
+script.fish: text/x-fishscript<span class=p>;</span> <span class=nv>charset</span><span class=o>=</span>us-ascii
+</code></pre></div><p>Pretty neat!<p>That&rsquo;s it for now. If you want to make something more complicated <a href=https://www.ibm.com/support/knowledgecenter/en/SSLTBW_2.1.0/com.ibm.zos.v2r1.bpxa500/mgc.htm>IBM&rsquo;s Knowledge Center</a> has some easy to read information on magic files (and of course there&rsquo;s always the <a href=https://linux.die.net/man/5/magic>manpage for magic</a>).</article></main><footer id=footer></footer>
