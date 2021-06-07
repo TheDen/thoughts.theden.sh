@@ -19,7 +19,7 @@ Some notes:
 
 * The `cwebp` binary from [libwebp](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html) is required.
 * The `-q 90` flag is the quality factor.
-* The snippet assumes that imag files are either `.jpg` or `.png`.
+* The snippet assumes that image files are either `.jpg` or `.png`.
 
 
 # Deployment
