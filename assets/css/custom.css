@@ -4,7 +4,7 @@ main#content ul#posts {
 		font-size: 16px;
 		font-size: 1.2rem !important;
 		margin-top: 0;
-		padding: 0;
+		padding: 2%;
 }
 
 header#banner {
@@ -29,3 +29,17 @@ main#content a {
 *::-moz-selection { color: red}
 *::selection { color: red; }
 
+body {
+	transform: rotate(-2deg);
+	top:-5%;
+	left:-5%;
+	width:110%;
+}
+
+#content {
+	transform: rotate(2deg);
+	margin-left: 5%;
+  padding-left: 2%;
+	padding-right: 2%;
+	padding-top: 10px;
+}
