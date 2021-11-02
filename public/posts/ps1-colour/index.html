@@ -1,65 +1,12 @@
-<!DOCTYPE html>
-<html><head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="thoughts.theden.sh — Denis Khoshaba">
-    
-    <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
-    
-    
-    <link rel="stylesheet" href="/css/hack.min.css">
-
-    <title>Changing Your PS1&#39;s Prompt Based on The Previous Command&#39;s Return Value</title>
-</head>
-<body><header id="banner">
-    <h2><a href="https://thoughts.theden.sh/">thoughts.theden.sh</a></h2>
-    <nav>
-        <ul>
-            
-        </ul>
-    </nav>
-</header>
-<main id="content">
-<article>
-    <header id="post-header">
-        <h1>Changing Your PS1&#39;s Prompt Based on The Previous Command&#39;s Return Value</h1>
-            <div>
-                <time>June 25, 2021</time>
-                </div>
-    </header><p>You may find it useful for your PS1 to signal if a previous command returned <code>0</code> or not. One neat way to do this that doesn&rsquo;t add clutter is to have your PS1 change colour based on the previous command&rsquo;s return value.</p>
-<p>I find that it also works well for scrollback, allowing me to at a quick glance where things went wrong. It can also draw attention to nonzero return values for programs that don&rsquo;t properly signal that they didn&rsquo;t properly exit to a user.</p>
-<p>Using the <a href="https://man7.org/linux/man-pages/man4/console_codes.4.html">man page for the console escape codes</a> as reference, I wanted the <code>PS1</code> to be <code>red</code> or code <code>31</code> when there is a nonzero return value, and green or <code>32</code> for a zero return value.</p>
-<p>I also keep my <code>PS1</code> prompt minimal being just a <code>$</code> character, but it should be trivial to adapt your own prompt.</p>
-<h2 id="setting-the-colours">Setting the Colours</h2>
-<p>The green and red prompts for the <code>$</code> character can be set like so</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># green prompt</span>
-<span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;\[\e[32m\]</span>$<span class="s2"> \[\e[0m\]&#34;</span>
-<span class="c1"># red prompt</span>
-<span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;\[\e[31m\]</span>$<span class="s2"> \[\e[0m\]&#34;</span>
-</code></pre></div><p>where</p>
-<ul>
-<li><code>\e</code> is the escape sequence</li>
-<li><code>\e[0m</code> resets the attributes to the default at the end of the prompt.</li>
-<li>The <code>\[</code> and <code>\]</code> are used to wrap non-printing control sequences (in our case the colour escape sequences), so word wrapping doesn&rsquo;t break.</li>
-</ul>
-<h2 id="colour-switching-on-return-value">Colour Switching on Return Value</h2>
-<p>We can use special shell variable <code>$?</code> that gives us the return value of the last executed command. What we want is to return the string <code>32</code> (green) if it&rsquo;s zero, and <code>31</code> (red) otherwise. Using bash conditionals, we can test this</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">$ <span class="nb">true</span>
-$ <span class="o">[[</span> <span class="nv">$?</span> <span class="o">=</span> <span class="m">0</span> <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">printf</span> <span class="m">32</span> <span class="o">||</span> <span class="nb">printf</span> <span class="m">31</span>
-<span class="m">32</span>
-$ <span class="nb">false</span>
-$ <span class="o">[[</span> <span class="nv">$?</span> <span class="o">=</span> <span class="m">0</span> <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">printf</span> <span class="m">32</span> <span class="o">||</span> <span class="nb">printf</span> <span class="m">31</span>
-<span class="m">31</span>
-</code></pre></div><h2 id="putting-it-together">Putting it together</h2>
-<p>Inserting the conditional into the <code>PS1</code> where the colour sequence number was as a subshell we have</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="nv">PS1</span><span class="o">=</span><span class="s1">&#39;\[\e[$([[ $? = 0 ]] &amp;&amp; printf 32 || printf 31)m\]$ \[\e[0m\]&#39;</span>
-</code></pre></div><p>(Note that we use single quotes so that the subshell isn&rsquo;t evaluated when setting the <code>PS1</code> variable)</p>
-<p>Now whenever you run a command and it returns <code>0</code> the prompt should be green, and if it&rsquo;s nonzero the prompt will turn red.</p>
-</article>
-
-        </main><footer id="footer">
-    
-    <a style="text-decoration: none; color: white; font-size: 1rem; color: #eb00fb" href="https://theden.sh" >theden.sh</a>
-</footer>
-</body>
-</html>
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="thoughts.theden.sh — Denis Khoshaba"><link rel="shortcut icon" href=https://thoughts.theden.sh/favicon.ico><link rel=stylesheet href=/css/hack.min.css><title>Changing Your PS1's Prompt Based on The Previous Command's Return Value</title><header id=banner><h2><a href=https://thoughts.theden.sh/>thoughts.theden.sh</a></h2><nav><ul></ul></nav></header><main id=content><article><header id=post-header><h1>Changing Your PS1's Prompt Based on The Previous Command's Return Value</h1><div><time>June 25, 2021</time></div></header><p>You may find it useful for your PS1 to signal if a previous command returned <code>0</code> or not. One neat way to do this that doesn&rsquo;t add clutter is to have your PS1 change colour based on the previous command&rsquo;s return value.<p>I find that it also works well for scrollback, allowing me to at a quick glance where things went wrong. It can also draw attention to nonzero return values for programs that don&rsquo;t properly signal that they didn&rsquo;t properly exit to a user.<p>Using the <a href=https://man7.org/linux/man-pages/man4/console_codes.4.html>man page for the console escape codes</a> as reference, I wanted the <code>PS1</code> to be <code>red</code> or code <code>31</code> when there is a nonzero return value, and green or <code>32</code> for a zero return value.<p>I also keep my <code>PS1</code> prompt minimal being just a <code>$</code> character, but it should be trivial to adapt your own prompt.<h2 id=setting-the-colours>Setting the Colours</h2><p>The green and red prompts for the <code>$</code> character can be set like so<div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=c1># green prompt</span>
+<span class=nv>PS1</span><span class=o>=</span><span class=s2>&#34;\[\e[32m\]</span>$<span class=s2> \[\e[0m\]&#34;</span>
+<span class=c1># red prompt</span>
+<span class=nv>PS1</span><span class=o>=</span><span class=s2>&#34;\[\e[31m\]</span>$<span class=s2> \[\e[0m\]&#34;</span>
+</code></pre></div><p>where<ul><li><code>\e</code> is the escape sequence<li><code>\e[0m</code> resets the attributes to the default at the end of the prompt.<li>The <code>\[</code> and <code>\]</code> are used to wrap non-printing control sequences (in our case the colour escape sequences), so word wrapping doesn&rsquo;t break.</ul><h2 id=colour-switching-on-return-value>Colour Switching on Return Value</h2><p>We can use special shell variable <code>$?</code> that gives us the return value of the last executed command. What we want is to return the string <code>32</code> (green) if it&rsquo;s zero, and <code>31</code> (red) otherwise. Using bash conditionals, we can test this<div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash>$ <span class=nb>true</span>
+$ <span class=o>[[</span> <span class=nv>$?</span> <span class=o>=</span> <span class=m>0</span> <span class=o>]]</span> <span class=o>&amp;&amp;</span> <span class=nb>printf</span> <span class=m>32</span> <span class=o>||</span> <span class=nb>printf</span> <span class=m>31</span>
+<span class=m>32</span>
+$ <span class=nb>false</span>
+$ <span class=o>[[</span> <span class=nv>$?</span> <span class=o>=</span> <span class=m>0</span> <span class=o>]]</span> <span class=o>&amp;&amp;</span> <span class=nb>printf</span> <span class=m>32</span> <span class=o>||</span> <span class=nb>printf</span> <span class=m>31</span>
+<span class=m>31</span>
+</code></pre></div><h2 id=putting-it-together>Putting it together</h2><p>Inserting the conditional into the <code>PS1</code> where the colour sequence number was as a subshell we have<div class=highlight><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=nv>PS1</span><span class=o>=</span><span class=s1>&#39;\[\e[$([[ $? = 0 ]] &amp;&amp; printf 32 || printf 31)m\]$ \[\e[0m\]&#39;</span>
+</code></pre></div><p>(Note that we use single quotes so that the subshell isn&rsquo;t evaluated when setting the <code>PS1</code> variable)<p>Now whenever you run a command and it returns <code>0</code> the prompt should be green, and if it&rsquo;s nonzero the prompt will turn red.</article></main><footer id=footer><a style=text-decoration:none;color:#fff;font-size:1rem;color:#eb00fb href=https://theden.sh>theden.sh</a></footer>
