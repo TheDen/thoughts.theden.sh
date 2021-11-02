@@ -2,7 +2,7 @@
 main#content ul#posts {
 		list-style-type: none;
 		font-size: 16px;
-		font-size: 1.5rem !important;
+		font-size: 1.2rem !important;
 		margin-top: 0;
 		padding: 0;
 }
@@ -12,7 +12,7 @@ header#banner {
 }
 
 header#banner h2 {
-		font-weight: 400;
+		font-weight: bold;
 }
 
 main#content h3 {
@@ -22,7 +22,10 @@ main#content h3 {
 main#content ul#posts small {
 		display: none;
 }
-
 main#content a {
-		color: #31c5ab!important;
+	color: #fff900 !important;
 }
+
+*::-moz-selection { color: red}
+*::selection { color: red; }
+

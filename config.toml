@@ -7,7 +7,7 @@ pygmentsCodeFences = true
 pygmentsUseClasses = true
 
 [params]
-  dark = "off"
+  dark = "on"
   highlight = true
   description = "thoughts.theden.sh — Denis Khoshaba"
   author = "Denis Khoshba"
