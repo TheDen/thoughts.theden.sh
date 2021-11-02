@@ -6,7 +6,8 @@
     
     <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
     
-    <link rel="stylesheet" href="/css/style.min.css">
+    
+    <link rel="stylesheet" href="/css/hack.min.css">
 
     <title>Changing Your PS1&#39;s Prompt Based on The Previous Command&#39;s Return Value</title>
 </head>
@@ -31,7 +32,7 @@
 <p>I also keep my <code>PS1</code> prompt minimal being just a <code>$</code> character, but it should be trivial to adapt your own prompt.</p>
 <h2 id="setting-the-colours">Setting the Colours</h2>
 <p>The green and red prompts for the <code>$</code> character can be set like so</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># green prompt</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># green prompt</span>
 <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;\[\e[32m\]</span>$<span class="s2"> \[\e[0m\]&#34;</span>
 <span class="c1"># red prompt</span>
 <span class="nv">PS1</span><span class="o">=</span><span class="s2">&#34;\[\e[31m\]</span>$<span class="s2"> \[\e[0m\]&#34;</span>
@@ -43,7 +44,7 @@
 </ul>
 <h2 id="colour-switching-on-return-value">Colour Switching on Return Value</h2>
 <p>We can use special shell variable <code>$?</code> that gives us the return value of the last executed command. What we want is to return the string <code>32</code> (green) if it&rsquo;s zero, and <code>31</code> (red) otherwise. Using bash conditionals, we can test this</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">$ <span class="nb">true</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">$ <span class="nb">true</span>
 $ <span class="o">[[</span> <span class="nv">$?</span> <span class="o">=</span> <span class="m">0</span> <span class="o">]]</span> <span class="o">&amp;&amp;</span> <span class="nb">printf</span> <span class="m">32</span> <span class="o">||</span> <span class="nb">printf</span> <span class="m">31</span>
 <span class="m">32</span>
 $ <span class="nb">false</span>
@@ -51,7 +52,7 @@ $ <span class="o">[[</span> <span class="nv">$?</span> <span class="o">=</span> 
 <span class="m">31</span>
 </code></pre></div><h2 id="putting-it-together">Putting it together</h2>
 <p>Inserting the conditional into the <code>PS1</code> where the colour sequence number was as a subshell we have</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="nv">PS1</span><span class="o">=</span><span class="s1">&#39;\[\e[$([[ $? = 0 ]] &amp;&amp; printf 32 || printf 31)m\]$ \[\e[0m\]&#39;</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="nv">PS1</span><span class="o">=</span><span class="s1">&#39;\[\e[$([[ $? = 0 ]] &amp;&amp; printf 32 || printf 31)m\]$ \[\e[0m\]&#39;</span>
 </code></pre></div><p>(Note that we use single quotes so that the subshell isn&rsquo;t evaluated when setting the <code>PS1</code> variable)</p>
 <p>Now whenever you run a command and it returns <code>0</code> the prompt should be green, and if it&rsquo;s nonzero the prompt will turn red.</p>
 </article>

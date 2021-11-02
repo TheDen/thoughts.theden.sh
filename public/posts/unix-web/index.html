@@ -6,7 +6,8 @@
     
     <link rel="shortcut icon" href="https://thoughts.theden.sh/favicon.ico">
     
-    <link rel="stylesheet" href="/css/style.min.css">
+    
+    <link rel="stylesheet" href="/css/hack.min.css">
 
     <title>Unix philosophy-esque approach to web tooling</title>
 </head>
@@ -28,7 +29,7 @@
     </header><p>[Ongoing. I&rsquo;ll be adding for snippets to this page that I find useful over time  <a href="https://github.com/TheDen/thoughts.theden.sh">Suggestions are also welcome</a>]</p>
 <h1 id="creating-webp-images">Creating WebP images</h1>
 <p>If you want to recursively create <code>.webp</code> versions of images in a folder (same name, saved in same location, different extension name), this script will do that</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash"><span class="k">while</span> <span class="nv">IFS</span><span class="o">=</span> <span class="nb">read</span> -r -d <span class="s1">&#39;&#39;</span> file<span class="p">;</span> <span class="k">do</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="k">while</span> <span class="nv">IFS</span><span class="o">=</span> <span class="nb">read</span> -r -d <span class="s1">&#39;&#39;</span> file<span class="p">;</span> <span class="k">do</span>
   cwebp -q <span class="m">90</span> <span class="s2">&#34;</span><span class="nv">$file</span><span class="s2">&#34;</span> -o <span class="s2">&#34;</span><span class="si">${</span><span class="nv">file</span><span class="p">%.*</span><span class="si">}</span><span class="s2">.webp&#34;</span> <span class="o">||</span> <span class="nb">true</span>
 <span class="k">done</span> &lt; &lt;<span class="o">(</span>find ./ -type f <span class="se">\(</span> -name <span class="s2">&#34;*.png&#34;</span> -o -name <span class="s2">&#34;*.jpg&#34;</span> <span class="se">\)</span> -print0<span class="o">)</span>
 </code></pre></div><p>Some notes:</p>
@@ -39,12 +40,12 @@
 </ul>
 <h1 id="deployment">Deployment</h1>
 <p>Assuming you want <code>dist/</code> to be the deployed folder</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">rsync -av . dist/ --exclude dist/ --exclude .git/ --exclude .gitignore
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">rsync -av . dist/ --exclude dist/ --exclude .git/ --exclude .gitignore
 </code></pre></div><p>and to push the folder as a specific git branch, for example to deploy it on GitHub pages</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">git subtree push --prefix dist origin gh-pages
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">git subtree push --prefix dist origin gh-pages
 </code></pre></div><h1 id="minification">Minification</h1>
 <p>Using the <a href="https://github.com/tdewolff/minify">minify</a> cli tool, this example snippet will minify any assets in the <code>dist/</code> folder. Files that contain <code>.min</code> will be excluded</p>
-<div class="highlight"><pre class="chroma"><code class="language-bash" data-lang="bash">find ./dist/ -type f <span class="se">\(</span> <span class="se">\
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">find ./dist/ -type f <span class="se">\(</span> <span class="se">\
 </span><span class="se"></span>  -name <span class="s2">&#34;*.html&#34;</span> <span class="se">\
 </span><span class="se"></span>  -o -name <span class="s1">&#39;*.js&#39;</span> <span class="se">\
 </span><span class="se"></span>  -o -name <span class="s1">&#39;*.css&#39;</span> <span class="se">\
