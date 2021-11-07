@@ -1,5 +1,7 @@
 #!/bin/bash
 
+hugo
+
 echo "Minifying everything we can"
 find ./public/ -type f \( \
   -name "*.html" \
