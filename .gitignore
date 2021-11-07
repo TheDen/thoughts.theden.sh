@@ -14,3 +14,5 @@ Session.vim
 .netrwhist
 # auto-generated tag files
 tags
+
+.hugo_build.lock
