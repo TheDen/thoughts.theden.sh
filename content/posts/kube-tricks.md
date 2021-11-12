@@ -26,7 +26,7 @@ spec:
     - "tail -f /dev/null"
 ```
 
-Enusre `liveness` and `readiness` probes are commented out if it depends on a runtime condition.
+Ensure `liveness` and `readiness` probes are commented out if it depends on a runtime condition.
 
 ## Utilising [podmanagementpolicy](https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/#pod-management-policy)
 
@@ -50,13 +50,13 @@ parameters:
   type: pd-standard
 ```
 
-Where `reclaimPolicy: Retain` ensures if `PVs` are deleted, on the storage backed side (EBS, GCP Disks etc.) are preserved. The general idea is not to let Kubernetes actually delete any data, the `PV` will disappear but the volume will still persist outside of Kuvernetes. This is useful when one accidentally deletes a `PV`, since it can be reattached to a new `PVC` for recovery (I’ve had to do this unfortunately).
+Where `reclaimPolicy: Retain` ensures if `PVs` are deleted, on the storage backed side (EBS, GCP Disks etc.) are preserved. The general idea is not to let Kubernetes actually delete any data, the `PV` will disappear but the volume will still persist outside of Kubernetes. This is useful when one accidentally deletes a `PV`, since it can be reattached to a new `PVC` for recovery (I’ve had to do this unfortunately).
 
 
 ## Debugging Methods
 
 
-When something goes awry, and sometimes there isn't sophisticated monitoring already set up because there isn't enough time to build it yet—so one will probably need to get familiar with checking the right places, espcially if an issue is urgent.
+When something goes awry, and sometimes there isn't sophisticated monitoring already set up because there isn't enough time to build it yet—so one will probably need to get familiar with checking the right places, especially if an issue is urgent.
 
 For example if something is broken and it’s not immediately obvious if it’s an application or a cluster-wide issue, a good order to deep-dive into things would be:
 
@@ -68,15 +68,15 @@ For example if something is broken and it’s not immediately obvious if it’s 
 * If it’s a performance issue, use `watch -n5 kubectl top nodes` (or `kubectl top pods`) and inspect.
 * If it’s a scaling issue check `autoscaler kubectl -n kube-system logs -f deployment.apps/cluster-autoscaler`.
 * If it’s a networking issue check the Kubernetes DNS. In certain infra configurations `kube-dns` pods can be scheduled on only one node (sometimes a preemptible or spot node), guaranteeing downtime.
-* Check the VMs on the cloud provider if it's a compute issues, or the disk if it’s storage. Sometimes it's preemptible/spot nodes going down (or the general provider itself)
+* Check the VMs on the cloud provider if it's a compute issues, or the disk if it’s a storage issue. Sometimes it's preemptible/spot nodes going down (or the general provider itself)
 Usually the problem will emerge. Normally one doesn't often need to directly connect to the VM.
 
 ## `StatefulSets` are more trouble than they're worth
 
-`StatefulSets` have their place, but in my opinion they’re not ideal when one really wants to principally keep state. Useful for general compute pods where it’s good to keep state between pod restarts and the like. But in situatuions where on is running a properly stateful service like `HDFS` or `ES`, a `Deployment` + `PVC` is almost always better. Here are some comparisons, say for a `HDFS` (namenode) pod with `n` datanodes:
+`StatefulSets` have their place, but in my opinion they’re not ideal when one really wants to principally keep state. Useful for general compute pods where it’s good to keep state between pod restarts and the like. But in situations where on is running a properly stateful service like `HDFS` or `ES`, a `Deployment` + `PVC` is almost always better. Here are some comparisons, say for a `HDFS` (namenode) pod with `n` datanodes:
 
 
-* If one wants to remove datanode number 4 of n in a `StatefulSet`, one has to scale them down since they’re ordered
+* If one wants to remove ; number 4 of n in a `StatefulSet`, one has to scale them down since they’re ordered
 * If one wants to migrate the `PVs` to a different cluster, it's non-trivial since `volumeClaimTemplates` will create new `PVCs` + `PVs`
 * If one accidentally delete the `StatefulSet`, the `volumeClaimTemplates` is removed, and non-trivial to reattach `PVs` (if they were set to `Retain`).
 * One can't have datanodes in a `StatefulSet` that have different `PVC` sizes, requests, env vars, or anything useful. They stay identical.
@@ -86,7 +86,7 @@ Usually the problem will emerge. Normally one doesn't often need to directly con
 
 Both useful for CI, but generally a good idea to check the `diff` of a resource that's about to updated.
 
-## Switch Namespaces and Clusters Daster
+## Switch Namespaces and Clusters Faster
 
 Tools like [kubectx + kubens](https://github.com/ahmetb/kubectx) are useful to switch between different clusters and namespaces faster. Renaming both binaries to `kcontext` and `knamespace` is another neat trick to make `kubectl` autocomplete.
 
