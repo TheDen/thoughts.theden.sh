@@ -1,10 +1,10 @@
 /* index.html styles */
 main#content ul#posts {
-		list-style-type: none;
-		font-size: 16px;
-		font-size: 1.2rem !important;
-		margin-top: 0;
-		padding: 2%;
+	list-style-type: none;
+	font-size: 16px;
+	font-size: 1.2rem !important;
+	margin-top: 0;
+	padding: 2%;
 }
 
 header#banner {
@@ -12,15 +12,15 @@ header#banner {
 }
 
 header#banner h2 {
-		font-weight: bold;
+	font-weight: bold;
 }
 
 main#content h3 {
-		display: none;
+	display: none;
 }
 
 main#content ul#posts small {
-		display: none;
+	display: none;
 }
 main#content a {
 	color: #fff900 !important;
@@ -28,3 +28,7 @@ main#content a {
 
 *::-moz-selection { color: red}
 *::selection { color: red; }
+
+main#content code {
+	filter: brightness(0.5);
+}
