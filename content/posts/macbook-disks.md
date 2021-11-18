@@ -1,6 +1,6 @@
 ---
 title: "M1 MacBooks and Drive Wear"
-date: "2021-11-10"
+date: "2021-11-17"
 draft: false
 ---
 
