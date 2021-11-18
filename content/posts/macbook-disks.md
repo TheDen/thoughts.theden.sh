@@ -34,7 +34,7 @@ Or as a one-liner
 
 `smartctl -a /dev/disk0 | awk -F ':' '/Percentage Used:/{gsub(/ /, "", $2); print $2}'`
 
-In my case it's `0%` (The MacBook . But what exactly does `Percentage Used`? These [Kingston](https://media.kingston.com/support/downloads/MKP_521.6_SMART-DCP1000_attribute.pdf) and [nvmexpress.com's](https://www.nvmexpress.org/wp-content/uploads/NVM_Express_Management_Interface_1_0a_2017.04.08_-_gold.pdf) documents shed some light
+In my case it's `0%`, but what exactly does `Percentage Used`? These [Kingston](https://media.kingston.com/support/downloads/MKP_521.6_SMART-DCP1000_attribute.pdf) and [nvmexpress.com's](https://www.nvmexpress.org/wp-content/uploads/NVM_Express_Management_Interface_1_0a_2017.04.08_-_gold.pdf) documents shed some light
 
 
 >Percentage Used: Contains a vendor specific estimate of the percentage of NVM subsystem life used

@@ -17,7 +17,7 @@ Power On Hours:                     564
 Unsafe Shutdowns:                   12
 Media and Data Integrity Errors:    0
 Error Information Log Entries:      0
-</code></pre><p>Or as a one-liner<p><code>smartctl -a /dev/disk0 | awk -F ':' '/Percentage Used:/{gsub(/ /, "", $2); print $2}'</code><p>In my case it&rsquo;s <code>0%</code> (The MacBook . But what exactly does <code>Percentage Used</code>? These <a href=https://media.kingston.com/support/downloads/MKP_521.6_SMART-DCP1000_attribute.pdf>Kingston</a> and <a href=https://www.nvmexpress.org/wp-content/uploads/NVM_Express_Management_Interface_1_0a_2017.04.08_-_gold.pdf>nvmexpress.com&rsquo;s</a> documents shed some light<blockquote><p>Percentage Used: Contains a vendor specific estimate of the percentage of NVM subsystem life used
+</code></pre><p>Or as a one-liner<p><code>smartctl -a /dev/disk0 | awk -F ':' '/Percentage Used:/{gsub(/ /, "", $2); print $2}'</code><p>In my case it&rsquo;s <code>0%</code>, but what exactly does <code>Percentage Used</code>? These <a href=https://media.kingston.com/support/downloads/MKP_521.6_SMART-DCP1000_attribute.pdf>Kingston</a> and <a href=https://www.nvmexpress.org/wp-content/uploads/NVM_Express_Management_Interface_1_0a_2017.04.08_-_gold.pdf>nvmexpress.com&rsquo;s</a> documents shed some light<blockquote><p>Percentage Used: Contains a vendor specific estimate of the percentage of NVM subsystem life used
 based on the actual usage and the manufacturer’s prediction of NVM life. A value of 100 indicates that
 the estimated endurance of the NVM in the NVM subsystem has been consumed, but may not indicate
 an NVM subsystem failure. The value is allowed to exceed 100. Percentages greater than 254 shall be
