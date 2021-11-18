@@ -1,0 +1,26 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><meta name=description content="thoughts.theden.sh — Denis Khoshaba"><link rel="shortcut icon" href=https://thoughts.theden.sh/favicon.ico><link rel=stylesheet href=/css/hack.min.css><title>M1 MacBooks and Drive Wear</title><header id=banner><h2><a href=https://thoughts.theden.sh/>thoughts.theden.sh</a></h2><nav><ul></ul></nav></header><main id=content><article><header id=post-header><h1>M1 MacBooks and Drive Wear</h1><div><time>November 10, 2021</time></div></header><p>Typically, to find the overall wear of a MacBook drive, one installs <code>smartctl</code> from <a href=http://www.smartmontools.org/>smartmontools</a> via <code>brew install smartmontools</code> or <code>sudo port install smartmontools</code><p>Then by looking at the <code>Percentage Used</code> from the output of <code>smartctl -a /dev/disk0</code><pre tabindex=0><code>=== START OF SMART DATA SECTION ===
+SMART overall-health self-assessment test result: PASSED
+
+SMART/Health Information (NVMe Log 0x02)
+Critical Warning:                   0x00
+Temperature:                        39 Celsius
+Available Spare:                    100%
+Available Spare Threshold:          99%
+Percentage Used:                    0%
+Data Units Read:                    48,035,261 [24.5 TB]
+Data Units Written:                 31,532,520 [16.1 TB]
+Host Read Commands:                 809,807,603
+Host Write Commands:                409,470,021
+Controller Busy Time:               0
+Power Cycles:                       123
+Power On Hours:                     564
+Unsafe Shutdowns:                   12
+Media and Data Integrity Errors:    0
+Error Information Log Entries:      0
+</code></pre><p>Or as a one-liner<p><code>smartctl -a /dev/disk0 | awk -F ':' '/Percentage Used:/{gsub(/ /, "", $2); print $2}'</code><p>In my case it&rsquo;s <code>0%</code> (The MacBook . But what exactly does <code>Percentage Used</code>? These <a href=https://media.kingston.com/support/downloads/MKP_521.6_SMART-DCP1000_attribute.pdf>Kingston</a> and <a href=https://www.nvmexpress.org/wp-content/uploads/NVM_Express_Management_Interface_1_0a_2017.04.08_-_gold.pdf>nvmexpress.com&rsquo;s</a> documents shed some light<blockquote><p>Percentage Used: Contains a vendor specific estimate of the percentage of NVM subsystem life used
+based on the actual usage and the manufacturer’s prediction of NVM life. A value of 100 indicates that
+the estimated endurance of the NVM in the NVM subsystem has been consumed, but may not indicate
+an NVM subsystem failure. The value is allowed to exceed 100. Percentages greater than 254 shall be
+represented as 255. This value shall be updated once per power-on hour (when the controller is not in a
+sleep state).
+Refer to the JEDEC JESD218A standard for SSD device life and endurance measurement techniques.</blockquote><p>My hunch is that it&rsquo;s probably related to <code>Data Units Read</code> and <code>Data Units Written</code> given how often MacOS swaps, but since the attribute is vendor specific it may be misinterpreted, I suppose time will tell whether these new soldered-on SSD MacBooks will become bricks.</article></main><footer id=footer><p><a style=color:#fff;font-size:1rem;color:#eb00fb href=https://theden.sh>theden.sh</a></footer>
