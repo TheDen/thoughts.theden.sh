@@ -1,4 +1,4 @@
-baseURL = "https://thoughts.theden.sh/"
+baseURL = "public/" #https://thoughts.theden.sh/"
 languageCode = "en-us"
 title = "thoughts.theden.sh"
 theme = "etch"
