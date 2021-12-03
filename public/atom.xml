@@ -1,0 +1,151 @@
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description/><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2021, Ronalds Vilcins</copyright><lastBuildDate>Wed, 17 Nov 2021 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>M1 MacBooks and Drive Wear</title><link>https://theden.github.io/thoughts.theden.sh/posts/macbook-disks/</link><description>&lt;p>Typically, to find the overall wear of a MacBook drive, one installs &lt;code>smartctl&lt;/code> from &lt;a href="http://www.smartmontools.org/">smartmontools&lt;/a> via &lt;code>brew install smartmontools&lt;/code> or &lt;code>sudo port install smartmontools&lt;/code>&lt;/p>
+&lt;p>Then by looking at the &lt;code>Percentage Used&lt;/code> from the output of &lt;code>smartctl -a /dev/disk0&lt;/code>&lt;/p>
+&lt;pre tabindex="0">&lt;code>=== START OF SMART DATA SECTION ===
+SMART overall-health self-assessment test result: PASSED
+SMART/Health Information (NVMe Log 0x02)
+Critical Warning: 0x00
+Temperature: 39 Celsius
+Available Spare: 100%
+Available Spare Threshold: 99%
+Percentage Used: 0%
+Data Units Read: 48,035,261 [24.5 TB]
+Data Units Written: 31,532,520 [16.1 TB]
+Host Read Commands: 809,807,603
+Host Write Commands: 409,470,021
+Controller Busy Time: 0
+Power Cycles: 123
+Power On Hours: 564
+Unsafe Shutdowns: 12
+Media and Data Integrity Errors: 0
+Error Information Log Entries: 0
+&lt;/code>&lt;/pre>&lt;p>Or as a one-liner&lt;/p>
+&lt;p>&lt;code>smartctl -a /dev/disk0 | awk -F ':' '/Percentage Used:/{gsub(/ /, &amp;quot;&amp;quot;, $2); print $2}'&lt;/code>&lt;/p>
+&lt;p>In my case it&amp;rsquo;s &lt;code>0%&lt;/code>, but what exactly does &lt;code>Percentage Used&lt;/code> mean? These &lt;a href="https://media.kingston.com/support/downloads/MKP_521.6_SMART-DCP1000_attribute.pdf">Kingston&lt;/a> and &lt;a href="https://www.nvmexpress.org/wp-content/uploads/NVM_Express_Management_Interface_1_0a_2017.04.08_-_gold.pdf">nvmexpress.com&amp;rsquo;s&lt;/a> documents shed some light&lt;/p>
+&lt;blockquote>
+&lt;p>Percentage Used: Contains a vendor specific estimate of the percentage of NVM subsystem life used
+based on the actual usage and the manufacturer’s prediction of NVM life. A value of 100 indicates that
+the estimated endurance of the NVM in the NVM subsystem has been consumed, but may not indicate
+an NVM subsystem failure. The value is allowed to exceed 100. Percentages greater than 254 shall be
+represented as 255. This value shall be updated once per power-on hour (when the controller is not in a
+sleep state).
+Refer to the JEDEC JESD218A standard for SSD device life and endurance measurement techniques.&lt;/p>
+&lt;/blockquote>
+&lt;p>My hunch is that it&amp;rsquo;s probably related to &lt;code>Data Units Read&lt;/code> and &lt;code>Data Units Written&lt;/code> given how often MacOS swaps, but since the attribute is vendor specific it may be misinterpreted, I suppose time will tell whether these new soldered-on SSD MacBooks will become bricks.&lt;/p></description><author>ronalds.vilcins@gmail.com (Ronalds Vilcins)</author><guid>https://theden.github.io/thoughts.theden.sh/posts/macbook-disks/</guid><pubDate>Wed, 17 Nov 2021 00:00:00 +0000</pubDate></item><item><title>Kube Tricks</title><link>https://theden.github.io/thoughts.theden.sh/posts/kube-tricks/</link><description>&lt;h2 id="ephemeral-debug-containers">Ephemeral Debug Containers &lt;a href="#ephemeral-debug-containers" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>One can use &lt;a href="https://kubernetes.io/docs/tasks/debug-application-cluster/debug-running-pod/#ephemeral-container">ephemeral debug containers&lt;/a>&lt;/p>
+&lt;p>Alternatively to edit in-place to test out configs and env vars use &lt;code>kubectl edit&lt;/code> to modify a pod (or &lt;code>Deployment&lt;/code>, &lt;code>StatefulSet&lt;/code> etc.) YAML to update the command to do nothing so one can &lt;code>kubectl exec&lt;/code> into the pod&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-YAML" data-lang="YAML">&lt;span style="color:#f92672">apiVersion&lt;/span>: &lt;span style="color:#ae81ff">v1&lt;/span>
+&lt;span style="color:#f92672">kind&lt;/span>: &lt;span style="color:#ae81ff">Pod&lt;/span>
+&lt;span style="color:#f92672">metadata&lt;/span>:
+&lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">unstable-pod&lt;/span>
+&lt;span style="color:#f92672">spec&lt;/span>:
+&lt;span style="color:#f92672">containers&lt;/span>:
+- &lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">unstable-pod&lt;/span>
+&lt;span style="color:#f92672">image&lt;/span>: &lt;span style="color:#ae81ff">foobar&lt;/span>
+&lt;span style="color:#f92672">command&lt;/span>:
+- &lt;span style="color:#ae81ff">sh&lt;/span>
+- -&lt;span style="color:#ae81ff">c&lt;/span>
+- &lt;span style="color:#e6db74">&amp;#34;tail -f /dev/null&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Ensure &lt;code>liveness&lt;/code> and &lt;code>readiness&lt;/code> probes are commented out if it depends on a runtime condition.&lt;/p>
+&lt;h2 id="utilising-podmanagementpolicyhttpskubernetesiodocstutorialsstateful-applicationbasic-stateful-setpod-management-policy">Utilising &lt;a href="https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/#pod-management-policy">podmanagementpolicy&lt;/a> &lt;a href="#utilising-podmanagementpolicyhttpskubernetesiodocstutorialsstateful-applicationbasic-stateful-setpod-management-policy" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Mostly used for &lt;code>StatefulSets&lt;/code>. Setting &lt;code>podManagementPolicy: &amp;quot;Parallel&amp;quot;&lt;/code> means the ordered pods will run and be terminated in parallel. Useful for when one doesn&amp;rsquo;t care about pods starting serially, in order. Keep in mind, if a broken deployment is scaled with &lt;code>n&lt;/code> pods, there will be an &lt;code>n&lt;/code> amount of &lt;code>CrashLoopBackOffs&lt;/code> in parallel.&lt;/p>
+&lt;h2 id="defaulting-to-retain-pvcs">Defaulting to Retain &lt;code>PVCs&lt;/code> &lt;a href="#defaulting-to-retain-pvcs" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>For example, creating a &lt;code>StorageClass&lt;/code> (e.g., if GCP is the provider)&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-yaml" data-lang="yaml">&lt;span style="color:#f92672">apiVersion&lt;/span>: &lt;span style="color:#ae81ff">storage.k8s.io/v1&lt;/span>
+&lt;span style="color:#f92672">kind&lt;/span>: &lt;span style="color:#ae81ff">StorageClass&lt;/span>
+&lt;span style="color:#f92672">metadata&lt;/span>:
+&lt;span style="color:#f92672">name&lt;/span>: &lt;span style="color:#ae81ff">standard-pd-retain&lt;/span>
+&lt;span style="color:#f92672">provisioner&lt;/span>: &lt;span style="color:#ae81ff">kubernetes.io/gce-pd&lt;/span>
+&lt;span style="color:#f92672">reclaimPolicy&lt;/span>: &lt;span style="color:#ae81ff">Retain&lt;/span>
+&lt;span style="color:#f92672">allowVolumeExpansion&lt;/span>: &lt;span style="color:#66d9ef">true&lt;/span>
+&lt;span style="color:#f92672">volumeBindingMode&lt;/span>: &lt;span style="color:#ae81ff">WaitForFirstConsumer&lt;/span>
+&lt;span style="color:#f92672">parameters&lt;/span>:
+&lt;span style="color:#f92672">type&lt;/span>: &lt;span style="color:#ae81ff">pd-standard&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Where &lt;code>reclaimPolicy: Retain&lt;/code> ensures if &lt;code>PVs&lt;/code> are deleted, on the storage backed side (EBS, GCP Disks etc.) are preserved. The general idea is not to let Kubernetes actually delete any data, the &lt;code>PV&lt;/code> will disappear but the volume will still persist outside of Kubernetes. This is useful when one accidentally deletes a &lt;code>PV&lt;/code>, since it can be reattached to a new &lt;code>PVC&lt;/code> for recovery (I’ve had to do this unfortunately).&lt;/p>
+&lt;h2 id="debugging-methods">Debugging Methods &lt;a href="#debugging-methods" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>When something goes awry, and sometimes there isn&amp;rsquo;t sophisticated monitoring already set up because there isn&amp;rsquo;t enough time to build it yet—so one will probably need to get familiar with checking the right places, especially if an issue is urgent.&lt;/p>
+&lt;p>For example if something is broken and it’s not immediately obvious if it’s an application or a cluster-wide issue, a good order to deep-dive into things would be:&lt;/p>
+&lt;ul>
+&lt;li>Go by the first hunch and follow that (as one is naturally inclined to do). After a while one will learn the general pitfalls, or have built intuition.&lt;/li>
+&lt;li>Start by running &lt;code>kubectl describe&lt;/code> on the pods that have issues and check the &lt;code>events&lt;/code>.&lt;/li>
+&lt;li>Run &lt;code>kubectl get events&lt;/code> in the namespace. Then &lt;code>kubectl get events --sort-by=.metadata.creationTimestamp&lt;/code> and inspect.&lt;/li>
+&lt;li>Check &lt;code>kubectl get pods -o wide&lt;/code> to see which node the pod is running on. Then &lt;code>kubectl describe nodes&lt;/code> to see if there are issues with the particular node (or any others).&lt;/li>
+&lt;li>If it’s an issue with &lt;code>PVCs&lt;/code>, check the persistent volumes since they sometimes get lost, via &lt;code>kubectl get pv&lt;/code> or &lt;code>kubectl describe pv&lt;/code>. If &lt;code>PVs&lt;/code> are stuck as &lt;code>Terminating&lt;/code>, edit the &lt;code>PV&lt;/code> and delete the &lt;code>Finalizers&lt;/code>.&lt;/li>
+&lt;li>If it’s a performance issue, use &lt;code>watch -n5 kubectl top nodes&lt;/code> (or &lt;code>kubectl top pods&lt;/code>) and inspect.&lt;/li>
+&lt;li>If it’s a scaling issue check &lt;code>autoscaler kubectl -n kube-system logs -f deployment.apps/cluster-autoscaler&lt;/code>.&lt;/li>
+&lt;li>If it’s a networking issue check the Kubernetes DNS. In certain infra configurations &lt;code>kube-dns&lt;/code> pods can be scheduled on only one node (sometimes a preemptible or spot node), guaranteeing downtime.&lt;/li>
+&lt;li>Check the VMs on the cloud provider if it&amp;rsquo;s a compute issues, or the disk if it’s a storage issue. Sometimes it&amp;rsquo;s preemptible/spot nodes going down (or the general provider itself)
+Usually the problem will emerge. Normally one doesn&amp;rsquo;t often need to directly connect to the VM.&lt;/li>
+&lt;/ul>
+&lt;h2 id="statefulsets-are-more-trouble-than-theyre-worth">&lt;code>StatefulSets&lt;/code> are more trouble than they&amp;rsquo;re worth &lt;a href="#statefulsets-are-more-trouble-than-theyre-worth" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>&lt;code>StatefulSets&lt;/code> have their place, but in my opinion they’re not ideal when one really wants to principally keep state. Useful for general compute pods where it’s good to keep state between pod restarts and the like. But in situations where on is running a properly stateful service like &lt;code>HDFS&lt;/code> or &lt;code>ES&lt;/code>, a &lt;code>Deployment&lt;/code> + &lt;code>PVC&lt;/code> is almost always better. Here are some comparisons, say for a &lt;code>HDFS&lt;/code> (namenode) pod with &lt;code>n&lt;/code> datanodes:&lt;/p>
+&lt;ul>
+&lt;li>If one wants to remove ; number 4 of n in a &lt;code>StatefulSet&lt;/code>, one has to scale them down since they’re ordered&lt;/li>
+&lt;li>If one wants to migrate the &lt;code>PVs&lt;/code> to a different cluster, it&amp;rsquo;s non-trivial since &lt;code>volumeClaimTemplates&lt;/code> will create new &lt;code>PVCs&lt;/code> + &lt;code>PVs&lt;/code>&lt;/li>
+&lt;li>If one accidentally delete the &lt;code>StatefulSet&lt;/code>, the &lt;code>volumeClaimTemplates&lt;/code> is removed, and non-trivial to reattach &lt;code>PVs&lt;/code> (if they were set to &lt;code>Retain&lt;/code>).&lt;/li>
+&lt;li>One can&amp;rsquo;t have datanodes in a &lt;code>StatefulSet&lt;/code> that have different &lt;code>PVC&lt;/code> sizes, requests, env vars, or anything useful. They stay identical.&lt;/li>
+&lt;/ul>
+&lt;h2 id="using-kubectl-diff-and-validate---dry-run">Using &lt;code>kubectl diff&lt;/code> and &lt;code>validate --dry-run&lt;/code> &lt;a href="#using-kubectl-diff-and-validate---dry-run" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Both useful for CI, but generally a good idea to check the &lt;code>diff&lt;/code> of a resource that&amp;rsquo;s about to updated.&lt;/p>
+&lt;h2 id="switch-namespaces-and-clusters-faster">Switch Namespaces and Clusters Faster &lt;a href="#switch-namespaces-and-clusters-faster" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Tools like &lt;a href="https://github.com/ahmetb/kubectx">kubectx + kubens&lt;/a> are useful to switch between different clusters and namespaces faster. Renaming both binaries to &lt;code>kcontext&lt;/code> and &lt;code>knamespace&lt;/code> is another neat trick to make &lt;code>kubectl&lt;/code> autocomplete.&lt;/p>
+&lt;h2 id="keeping-it-simple">Keeping it Simple &lt;a href="#keeping-it-simple" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Personally, I prefer &lt;code>kustomize&lt;/code> + &lt;code>envsubst&lt;/code> + &lt;code>python&lt;/code> to template via &lt;code>overlays&lt;/code>. I’m not into templating YAML (kustomize is advertised as &amp;ldquo;template-free&amp;rdquo; templating, but it&amp;rsquo;s still somewhat &lt;code>YAML HELL&lt;/code> like many things).&lt;/p>
+&lt;p>Personally I avoid using helm (messy configs, more moving parts, black box, the &amp;ldquo;package management&amp;rdquo; isn&amp;rsquo;t a feature for me for infra code), or try not to i.e., generate &lt;code>YAMLs&lt;/code> from a chart and use them. I try not use use too many Kubernetes operators or &lt;code>CRDs&lt;/code>, generally keeping things stock and primitive. Of course complexity is always difficult to manage, so compromises are made. Programatically generating Kubernetes manifests is a good engineering idea, but probably overkill for many teams.&lt;/p></description><author>ronalds.vilcins@gmail.com (Ronalds Vilcins)</author><guid>https://theden.github.io/thoughts.theden.sh/posts/kube-tricks/</guid><pubDate>Wed, 10 Nov 2021 00:00:00 +0000</pubDate></item><item><title>Changing Your PS1's Prompt Based on The Previous Command's Return Value</title><link>https://theden.github.io/thoughts.theden.sh/posts/ps1-colour/</link><description>&lt;p>You may find it useful for your PS1 to signal if a previous command returned &lt;code>0&lt;/code> or not. One neat way to do this that doesn&amp;rsquo;t add clutter is to have your PS1 change colour based on the previous command&amp;rsquo;s return value.&lt;/p>
+&lt;p>I find that it also works well for scrollback, allowing me to at a quick glance where things went wrong. It can also draw attention to nonzero return values for programs that don&amp;rsquo;t properly signal that they didn&amp;rsquo;t properly exit to a user.&lt;/p>
+&lt;p>Using the &lt;a href="https://man7.org/linux/man-pages/man4/console_codes.4.html">man page for the console escape codes&lt;/a> as reference, I wanted the &lt;code>PS1&lt;/code> to be &lt;code>red&lt;/code> or code &lt;code>31&lt;/code> when there is a nonzero return value, and green or &lt;code>32&lt;/code> for a zero return value.&lt;/p>
+&lt;p>I also keep my &lt;code>PS1&lt;/code> prompt minimal being just a &lt;code>$&lt;/code> character, but it should be trivial to adapt your own prompt.&lt;/p>
+&lt;h2 id="setting-the-colours">Setting the Colours &lt;a href="#setting-the-colours" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>The green and red prompts for the &lt;code>$&lt;/code> character can be set like so&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#75715e"># green prompt&lt;/span>
+PS1&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;\[\e[32m\]&lt;/span>$&lt;span style="color:#e6db74"> \[\e[0m\]&amp;#34;&lt;/span>
+&lt;span style="color:#75715e"># red prompt&lt;/span>
+PS1&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#34;\[\e[31m\]&lt;/span>$&lt;span style="color:#e6db74"> \[\e[0m\]&amp;#34;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>where&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>\e&lt;/code> is the escape sequence&lt;/li>
+&lt;li>&lt;code>\e[0m&lt;/code> resets the attributes to the default at the end of the prompt.&lt;/li>
+&lt;li>The &lt;code>\[&lt;/code> and &lt;code>\]&lt;/code> are used to wrap non-printing control sequences (in our case the colour escape sequences), so word wrapping doesn&amp;rsquo;t break.&lt;/li>
+&lt;/ul>
+&lt;h2 id="colour-switching-on-return-value">Colour Switching on Return Value &lt;a href="#colour-switching-on-return-value" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>We can use special shell variable &lt;code>$?&lt;/code> that gives us the return value of the last executed command. What we want is to return the string &lt;code>32&lt;/code> (green) if it&amp;rsquo;s zero, and &lt;code>31&lt;/code> (red) otherwise. Using bash conditionals, we can test this&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">$ true
+$ &lt;span style="color:#f92672">[[&lt;/span> $? &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span> &lt;span style="color:#f92672">]]&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> printf &lt;span style="color:#ae81ff">32&lt;/span> &lt;span style="color:#f92672">||&lt;/span> printf &lt;span style="color:#ae81ff">31&lt;/span>
+&lt;span style="color:#ae81ff">32&lt;/span>
+$ false
+$ &lt;span style="color:#f92672">[[&lt;/span> $? &lt;span style="color:#f92672">=&lt;/span> &lt;span style="color:#ae81ff">0&lt;/span> &lt;span style="color:#f92672">]]&lt;/span> &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> printf &lt;span style="color:#ae81ff">32&lt;/span> &lt;span style="color:#f92672">||&lt;/span> printf &lt;span style="color:#ae81ff">31&lt;/span>
+&lt;span style="color:#ae81ff">31&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;h2 id="putting-it-together">Putting it together &lt;a href="#putting-it-together" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Inserting the conditional into the &lt;code>PS1&lt;/code> where the colour sequence number was as a subshell we have&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">PS1&lt;span style="color:#f92672">=&lt;/span>&lt;span style="color:#e6db74">&amp;#39;\[\e[$([[ $? = 0 ]] &amp;amp;&amp;amp; printf 32 || printf 31)m\]$ \[\e[0m\]&amp;#39;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>(Note that we use single quotes so that the subshell isn&amp;rsquo;t evaluated when setting the &lt;code>PS1&lt;/code> variable)&lt;/p>
+&lt;p>Now whenever you run a command and it returns &lt;code>0&lt;/code> the prompt should be green, and if it&amp;rsquo;s nonzero the prompt will turn red.&lt;/p></description><author>ronalds.vilcins@gmail.com (Ronalds Vilcins)</author><guid>https://theden.github.io/thoughts.theden.sh/posts/ps1-colour/</guid><pubDate>Fri, 25 Jun 2021 21:17:06 +1000</pubDate></item><item><title>Unix philosophy-esque approach to web tooling</title><link>https://theden.github.io/thoughts.theden.sh/posts/unix-web/</link><description>&lt;p>[Ongoing. I&amp;rsquo;ll be adding for snippets to this page that I find useful over time &lt;a href="https://github.com/TheDen/thoughts.theden.sh">Suggestions are also welcome&lt;/a>]&lt;/p>
+&lt;h1 id="creating-webp-images">Creating WebP images &lt;a href="#creating-webp-images" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>If you want to recursively create &lt;code>.webp&lt;/code> versions of images in a folder (same name, saved in same location, different extension name), this script will do that&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">&lt;span style="color:#66d9ef">while&lt;/span> IFS&lt;span style="color:#f92672">=&lt;/span> read -r -d &lt;span style="color:#e6db74">&amp;#39;&amp;#39;&lt;/span> file; &lt;span style="color:#66d9ef">do&lt;/span>
+cwebp -q &lt;span style="color:#ae81ff">90&lt;/span> &lt;span style="color:#e6db74">&amp;#34;&lt;/span>$file&lt;span style="color:#e6db74">&amp;#34;&lt;/span> -o &lt;span style="color:#e6db74">&amp;#34;&lt;/span>&lt;span style="color:#e6db74">${&lt;/span>file%.*&lt;span style="color:#e6db74">}&lt;/span>&lt;span style="color:#e6db74">.webp&amp;#34;&lt;/span> &lt;span style="color:#f92672">||&lt;/span> true
+&lt;span style="color:#66d9ef">done&lt;/span> &amp;lt; &amp;lt;&lt;span style="color:#f92672">(&lt;/span>find ./ -type f &lt;span style="color:#ae81ff">\(&lt;/span> -name &lt;span style="color:#e6db74">&amp;#34;*.png&amp;#34;&lt;/span> -o -name &lt;span style="color:#e6db74">&amp;#34;*.jpg&amp;#34;&lt;/span> &lt;span style="color:#ae81ff">\)&lt;/span> -print0&lt;span style="color:#f92672">)&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>Some notes:&lt;/p>
+&lt;ul>
+&lt;li>The &lt;code>cwebp&lt;/code> binary from &lt;a href="https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html">libwebp&lt;/a> is required.&lt;/li>
+&lt;li>The &lt;code>-q 90&lt;/code> flag is the quality factor.&lt;/li>
+&lt;li>The snippet assumes that image files are either &lt;code>.jpg&lt;/code> or &lt;code>.png&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;h1 id="deployment">Deployment &lt;a href="#deployment" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>Assuming you want &lt;code>dist/&lt;/code> to be the deployed folder&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">rsync -av . dist/ --exclude dist/ --exclude .git/ --exclude .gitignore
+&lt;/code>&lt;/pre>&lt;/div>&lt;p>and to push the folder as a specific git branch, for example to deploy it on GitHub pages&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">git subtree push --prefix dist origin gh-pages
+&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="minification">Minification &lt;a href="#minification" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>Using the &lt;a href="https://github.com/tdewolff/minify">minify&lt;/a> cli tool, this example snippet will minify any assets in the &lt;code>dist/&lt;/code> folder. Files that contain &lt;code>.min&lt;/code> will be excluded&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4">&lt;code class="language-bash" data-lang="bash">find ./dist/ -type f &lt;span style="color:#ae81ff">\(&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> -name &lt;span style="color:#e6db74">&amp;#34;*.html&amp;#34;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> -o -name &lt;span style="color:#e6db74">&amp;#39;*.js&amp;#39;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> -o -name &lt;span style="color:#e6db74">&amp;#39;*.css&amp;#39;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> -o -name &lt;span style="color:#e6db74">&amp;#39;*.svg&amp;#39;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> -o -name &lt;span style="color:#e6db74">&amp;#34;*.xml&amp;#34;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> -o -name &lt;span style="color:#e6db74">&amp;#34;*.json&amp;#34;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> -o -name &lt;span style="color:#e6db74">&amp;#34;*.htm&amp;#34;&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> &lt;span style="color:#ae81ff">\)&lt;/span> &lt;span style="color:#ae81ff">\
+&lt;/span>&lt;span style="color:#ae81ff">&lt;/span> -and ! -name &lt;span style="color:#e6db74">&amp;#34;*.min*&amp;#34;&lt;/span> -print0 |
+xargs -0 -n1 -P4 -I &lt;span style="color:#e6db74">&amp;#39;{}&amp;#39;&lt;/span> sh -c &lt;span style="color:#e6db74">&amp;#39;minify -o &amp;#34;{}&amp;#34; &amp;#34;{}&amp;#34;&amp;#39;&lt;/span>
+&lt;/code>&lt;/pre>&lt;/div></description><author>ronalds.vilcins@gmail.com (Ronalds Vilcins)</author><guid>https://theden.github.io/thoughts.theden.sh/posts/unix-web/</guid><pubDate>Sat, 05 Jun 2021 00:00:00 +0000</pubDate></item></channel></rss>
