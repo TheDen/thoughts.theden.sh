@@ -1,6 +1,6 @@
 #!/bin/bash
 
-hugo
+hugo --gc --minify
 
 echo "Minifying everything we can"
 find ./public/ -type f \( \
