@@ -1,10 +1,12 @@
-baseURL = "public/" #https://thoughts.theden.sh/"
+baseURL = "https://theden.github.io/" #https://thoughts.theden.sh/"
 languageCode = "en-us"
 title = "thoughts.theden.sh"
 theme = "etch"
 enableInlineShortcodes = true
 pygmentsCodeFences = true
 pygmentsUseClasses = true
+canonifyurls = true
+
 
 [params]
   dark = "on"
