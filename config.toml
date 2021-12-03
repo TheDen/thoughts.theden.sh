@@ -7,7 +7,6 @@ pygmentsCodeFences = true
 pygmentsUseClasses = true
 canonifyurls = true
 
-
 [params]
   dark = "on"
   highlight = true
