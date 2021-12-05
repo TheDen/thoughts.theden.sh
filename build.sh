@@ -14,3 +14,5 @@ find ./public/ -type f \( \
   \) \
   -and ! -name "*.min*" -print0 |
   xargs -0 -n1 -P4 -I '{}' sh -c 'minify -o "{}" "{}"'
+
+cp CNAME public/
