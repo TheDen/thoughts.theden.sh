@@ -1,4 +1,80 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description/><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2021, Ronalds Vilcins</copyright><lastBuildDate>Wed, 17 Nov 2021 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>M1 MacBooks and Drive Wear</title><link>https://theden.github.io/thoughts.theden.sh/posts/macbook-disks/</link><description>&lt;p>Typically, to find the overall wear of a MacBook drive, one installs &lt;code>smartctl&lt;/code> from &lt;a href="http://www.smartmontools.org/">smartmontools&lt;/a> via &lt;code>brew install smartmontools&lt;/code> or &lt;code>sudo port install smartmontools&lt;/code>&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description/><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2021, Ronalds Vilcins</copyright><lastBuildDate>Wed, 08 Dec 2021 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>Organising One's Music Library</title><link>https://theden.github.io/thoughts.theden.sh/posts/organising-music/</link><description>&lt;h1 id="the-setup">The Setup &lt;a href="#the-setup" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>Recently I&amp;rsquo;ve moved made efforts to having a local lossless music collection. The setup is humble:&lt;/p>
+&lt;ul>
+&lt;li>The bare metal server is a mid-tier Synology NAS&lt;/li>
+&lt;li>&lt;a href="https://www.plex.tv/">Plex&lt;/a> as the media server software&lt;/li>
+&lt;li>With &lt;a href="https://plexamp.com/">Plexamp&lt;/a>, a solid music player client for Plex (runs on all major OSes)&lt;/li>
+&lt;/ul>
+&lt;p>Here is the client on MacOS
+&lt;img
+src="https://theden.github.io/thoughts.theden.sh/images/wes.png"
+alt="Wes Montgomery on Plexamp"
+loading="lazy"
+decoding="async"
+width="2290"
+height="1490"
+class="full-width"
+/>
+&lt;/p>
+&lt;p>Cool thing is it allows me to stream library when I&amp;rsquo;m outside, download locally, etc. most of the cool features that Spotify and Apple Music have, but without the negatives that come with it, like paying for a subscriptions, being tracked, or having your tracks from a playlist removed for whatever reason that the providers decide.
+;&lt;/p>
+&lt;h1 id="organising-music">Organising Music &lt;a href="#organising-music" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>Anyone that owned an iPod or MP3 player back in the day knows the pain of editing ID3 metadata and adding album art for their tunes so they appear clean on their device. Fortunately over the years, things have gotten easier—I&amp;rsquo;ll go through some tools I tried and my thoughts on what worked and what didn&amp;rsquo;t for me.&lt;/p>
+&lt;h2 id="musicbrainz-picardhttpspicardmusicbrainzorg">&lt;a href="https://picard.musicbrainz.org/">MusicBrainz Picard&lt;/a> &lt;a href="#musicbrainz-picardhttpspicardmusicbrainzorg" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Comment: Probably my favourite tool, most used for me.&lt;/p>
+&lt;p>Pros:&lt;/p>
+&lt;ul>
+&lt;li>Open Source and cross-platform&lt;/li>
+&lt;li>Supports &lt;a href="http://acoustid.org/">AcoustID&lt;/a> for identification&lt;/li>
+&lt;li>Supports &lt;a href="https://picard.musicbrainz.org/plugins/">heaps of plugins&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>Cons:&lt;/p>
+&lt;ul>
+&lt;li>Not command-line driven (may be a con for some)&lt;/li>
+&lt;li>Depending on your resources, it can be slow or crash with large libraries, so things may need to be chunked&lt;/li>
+&lt;li>May give undesired metadata, so it&amp;rsquo;s always a good idea to check the diffs&lt;/li>
+&lt;/ul>
+&lt;h2 id="beetshttpsgithubcombeetboxbeets">&lt;a href="https://github.com/beetbox/beets">Beets&lt;/a> &lt;a href="#beetshttpsgithubcombeetboxbeets" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Comment: Command line driven, very configurable, opinionated (in my opinion), but works well, and people seem to love the tool. However I just end up using MusicBrainz Picard most of the time.&lt;/p>
+&lt;p>Pros:&lt;/p>
+&lt;ul>
+&lt;li>Open source and cross-platform&lt;/li>
+&lt;li>Active development&lt;/li>
+&lt;li>&lt;a href="https://beets.readthedocs.io/en/stable/">Well-documented&lt;/a>&lt;/li>
+&lt;li>Config-file driven, so easily portable&lt;/li>
+&lt;li>Supports &lt;a href="https://beets.readthedocs.io/en/stable/plugins/index.html">heaps of plugins&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;p>Cons:&lt;/p>
+&lt;ul>
+&lt;li>Command line may be off-putting for some&lt;/li>
+&lt;li>May be too fiddly for some that just want better tags and album art&lt;/li>
+&lt;li>Can be disastrous for libraries if misconfigured&lt;/li>
+&lt;/ul>
+&lt;h2 id="blisshttpswwwblisshqcom">&lt;a href="https://www.blisshq.com/">Bliss&lt;/a> &lt;a href="#blisshttpswwwblisshqcom" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Comment: Solid, but didn&amp;rsquo;t work for me and I got a refund. It could work really well for others.&lt;/p>
+&lt;p>Pros:&lt;/p>
+&lt;ul>
+&lt;li>Works as a server, accessible via the web within your local network&lt;/li>
+&lt;li>Nice UI&lt;/li>
+&lt;li>Rule-based, which you set then it executes them on your library&lt;/li>
+&lt;/ul>
+&lt;p>Cons:&lt;/p>
+&lt;ul>
+&lt;li>Paid, closed&lt;/li>
+&lt;li>Was very slow for me&lt;/li>
+&lt;/ul>
+&lt;h2 id="mp3taghttpswwwmp3tagdeen">&lt;a href="https://www.mp3tag.de/en/">Mp3tag&lt;/a> &lt;a href="#mp3taghttpswwwmp3tagdeen" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Comment: Similar to MusicBrainz Picard, but I didn&amp;rsquo;t really use because it&amp;rsquo;s &lt;a href="https://community.mp3tag.de/t/mp3tag-under-gpl/7976/4">not open source&lt;/a>, and doesn&amp;rsquo;t support linux. I&amp;rsquo;ve read it&amp;rsquo;s solid for Windows users (but Picard supports windows anyway). An open source version I&amp;rsquo;ve seen of Mp3tag is &lt;a href="https://github.com/puddletag/puddletag">Puddletag&lt;/a>.&lt;/p>
+&lt;h2 id="mediamonkeyhttpswwwmediamonkeycom">&lt;a href="https://www.mediamonkey.com/">MediaMonkey&lt;/a> &lt;a href="#mediamonkeyhttpswwwmediamonkeycom" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Comment: Also didn&amp;rsquo;t really use this since it&amp;rsquo;s Windows and Android only. Many that organised music in the early 2000s would remember MediamMonkey, good to know the project is still going strong. Note that although there is a free version, there are &lt;a href="https://www.mediamonkey.com/windows">higher paid tier versions&lt;/a>, so for serious use it&amp;rsquo;s probably not free.&lt;/p>
+&lt;h2 id="roonhttpsroonlabscom">&lt;a href="https://roonlabs.com/">Roon&lt;/a> &lt;a href="#roonhttpsroonlabscom" class="hash g">#&lt;/a>&lt;/h2>
+&lt;p>Comment: Too expensive for many ($13/mo or $700 lifetime subscription), closed source. Would replace my entire Plex setup for music (organising isn&amp;rsquo;t the main feature of roon). I&amp;rsquo;ve heard great things about it, especially with its features that appeal to audiophiles. There is a free trial, but if I like it I&amp;rsquo;d have to pay the sub, so you I can&amp;rsquo;t miss out on what I don&amp;rsquo;t know I guess?&lt;/p>
+&lt;h2 id="miscellaneous-tools">Miscellaneous Tools &lt;a href="#miscellaneous-tools" class="hash g">#&lt;/a>&lt;/h2>
+&lt;ul>
+&lt;li>&lt;a href="https://flacon.github.io/">Flacon&lt;/a>: Splits a single large audio file containing the entire album into the separate audio tracks.&lt;/li>
+&lt;li>&lt;a href="https://eqmac.app/">eqMac&lt;/a>: Parametric equaliser for MacOS. Supports &lt;a href="https://github.com/jaakkopasanen/AutoEq">AutoEQ&lt;/a> for headphone users (not free). &lt;a href="https://rogueamoeba.com/soundsource/">Soundsource&lt;/a> is another alternative, but also not free&lt;/li>
+&lt;li>&lt;a href="https://www.foobar2000.org/mac">foobar&lt;/a>: There&amp;rsquo;s foobar for MacOS, not as full-featured as the Windows version, but good for audio files.&lt;/li>
+&lt;/ul></description><author>ronalds.vilcins@gmail.com (Ronalds Vilcins)</author><guid>https://theden.github.io/thoughts.theden.sh/posts/organising-music/</guid><pubDate>Wed, 08 Dec 2021 00:00:00 +0000</pubDate></item><item><title>M1 MacBooks and Drive Wear</title><link>https://theden.github.io/thoughts.theden.sh/posts/macbook-disks/</link><description>&lt;p>Typically, to find the overall wear of a MacBook drive, one installs &lt;code>smartctl&lt;/code> from &lt;a href="http://www.smartmontools.org/">smartmontools&lt;/a> via &lt;code>brew install smartmontools&lt;/code> or &lt;code>sudo port install smartmontools&lt;/code>&lt;/p>
 &lt;p>Then by looking at the &lt;code>Percentage Used&lt;/code> from the output of &lt;code>smartctl -a /dev/disk0&lt;/code>&lt;/p>
 &lt;pre tabindex="0">&lt;code>=== START OF SMART DATA SECTION ===
 SMART overall-health self-assessment test result: PASSED
