@@ -6,7 +6,7 @@ draft: false
 
 # The Setup
 
-Recently I've moved made efforts to having a local lossless music collection. The setup is humble:
+Recently I've made efforts to having a local lossless music collection. The setup is humble:
 
 * The bare metal server is a mid-tier Synology NAS
 * [Plex](https://www.plex.tv/) as the media server software
