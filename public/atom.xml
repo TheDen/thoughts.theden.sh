@@ -1,5 +1,5 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description/><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2021, Ronalds Vilcins</copyright><lastBuildDate>Wed, 08 Dec 2021 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>Organising One's Music Library</title><link>https://theden.github.io/thoughts.theden.sh/posts/organising-music/</link><description>&lt;h1 id="the-setup">The Setup &lt;a href="#the-setup" class="hash g">#&lt;/a>&lt;/h1>
-&lt;p>Recently I&amp;rsquo;ve made efforts to having a local lossless music collection. The setup is humble:&lt;/p>
+&lt;p>Recently I&amp;rsquo;ve made efforts to have a local lossless music collection. The setup is humble:&lt;/p>
 &lt;ul>
 &lt;li>The bare metal server is a mid-tier Synology NAS&lt;/li>
 &lt;li>&lt;a href="https://www.plex.tv/">Plex&lt;/a> as the media server software&lt;/li>
