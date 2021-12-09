@@ -1,5 +1,8 @@
-function hype () {
-	var sheet = window.document.styleSheets[0];
-	sheet.insertRule('*, *:before, *:after { cursor: url("/cursor.png"), auto; }', sheet.cssRules.length);
-  console.log("updated")
+function hype() {
+	if (document.styleSheets[1].disabled === false) {
+		document.styleSheets[1].disabled = true
+	}
+	else {
+		document.styleSheets[1].disabled = false
+	}
 }
