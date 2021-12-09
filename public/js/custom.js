@@ -1,1 +1,1 @@
-function hype(){document.styleSheets[1].disabled===!1?document.styleSheets[1].disabled=!0:document.styleSheets[1].disabled=!1}
+function hype(){document.getElementById('hype').disabled===!1?document.getElementById('hype').disabled=!0:document.getElementById('hype').disabled=!1}
