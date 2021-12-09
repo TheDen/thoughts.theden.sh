@@ -1,8 +1,8 @@
 function hype() {
-	if (document.styleSheets[1].disabled === false) {
-		document.styleSheets[1].disabled = true
+	if (document.getElementById('hype').disabled === false) {
+		document.getElementById('hype').disabled = true
 	}
 	else {
-		document.styleSheets[1].disabled = false
+		document.getElementById('hype').disabled = false
 	}
 }
