@@ -1,0 +1,1 @@
+function hype(){var a=window.document.styleSheets[0];a.insertRule('*, *:before, *:after { cursor: url("/cursor.png"), auto; }',a.cssRules.length),console.log("updated")}
