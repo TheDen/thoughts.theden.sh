@@ -40,7 +40,7 @@ Software:
       Boot Volume: Macintosh HD
       Boot Mode: Normal
       Computer Name: <REDACTED>
-      User Name: den <REDACTED>
+      User Name: <REDACTED>
       Secure Virtual Memory: Enabled
       System Integrity Protection: Enabled
       Time since boot: <REDACTED>
