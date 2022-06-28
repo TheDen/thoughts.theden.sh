@@ -24,7 +24,7 @@
 &lt;/blockquote>
 &lt;p>However, we can still create a RAM disk in MacOS and mount it within docker. I&amp;rsquo;ll mount a RAM disk and a standard docker volume and measuring the performance of both to compare.&lt;/p>
 &lt;h1 id="hardware">Hardware &lt;a href="#hardware" class="hash g">#&lt;/a>&lt;/h1>
-&lt;p>My M1 Air&amp;rsquo;s Macbook&amp;rsquo;s current sysinfo (unrelated info redacted)&lt;/p>
+&lt;p>My M1 Macbook Air&amp;rsquo;s current sysinfo (unrelated info redacted)&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>$ system_profiler SPSoftwareDataType SPHardwareDataType SPNVMeDataType
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>Software:
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>

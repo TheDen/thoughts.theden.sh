@@ -27,7 +27,7 @@ However, we can still create a RAM disk in MacOS and mount it within docker. I'l
 
 # Hardware 
 
-My M1 Air's Macbook's current sysinfo (unrelated info redacted)
+My M1 Macbook Air's current sysinfo (unrelated info redacted)
 
 ```bash
 $  system_profiler SPSoftwareDataType SPHardwareDataType SPNVMeDataType
