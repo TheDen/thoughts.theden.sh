@@ -4,6 +4,18 @@ date: "2022-06-27"
 draft: false
 ---
 
+- [Primer](#primer)
+- [Hardware](#hardware)
+- [Setup](#setup)
+- [Random Read and write performance](#random-read-and-write-performance)
+  * [Standard volume](#standard-volume)
+  * [RAM Disk](#ram-disk)
+- [I/0 latency](#i0-latency)
+  * [Standard volume](#standard-volume-1)
+  * [RAM Disk](#ram-disk-1)
+- [Cleanup](#cleanup)
+- [Results](#results)
+
 # Primer
 
 Whilst docker does support [tmpfs](https://docs.docker.com/storage/tmpfs/) natively, it's only available if you're running docker on linux. A use-case for using a ram disk, as described in the documentation:
@@ -117,7 +129,7 @@ We'll be using [fio](https://github.com/axboe/fio) for benchmarking read/write p
 apk add ioping
 ```
 
-### Standard volume
+## Standard volume
 ```bash
 /std-volume # fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --filename=test --bs=4k --iodepth=64 --size=1G --readwrite=randrw --rwmixread=75
 test: (g=0): rw=randrw, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=64
@@ -144,7 +156,7 @@ Run status group 0 (all jobs):
   WRITE: bw=8231KiB/s (8429kB/s), 8231KiB/s-8231KiB/s (8429kB/s-8429kB/s), io=256MiB (269MB), run=31900-31900msec
 ```
 
-### RAM Disk
+## RAM Disk
 
 ```bash
 /ramdisk # fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --filename=test --bs=4k --iodepth=64 --size=1G --readwrite=randrw --rwmixread=75
@@ -173,7 +185,7 @@ Run status group 0 (all jobs):
 
 ```
 
-## I/0 latency
+# I/0 latency
 
 We also can use [IOPing](https://github.com/koct9i/ioping) to monitor I/O latency in real time, as a basic heuristic.
 
@@ -182,7 +194,7 @@ We also can use [IOPing](https://github.com/koct9i/ioping) to monitor I/O latenc
 apk add ioping
 ```
 
-### Standard volume
+## Standard volume
 
 ```bash
 /std-volume # ioping -c 10 .
@@ -204,7 +216,7 @@ min/avg/max/mdev = 254.2 us / 334.5 us / 396.4 us / 46.5 us
 ```
 
 
-### RAM Disk
+## RAM Disk
 
 
 ```bash
