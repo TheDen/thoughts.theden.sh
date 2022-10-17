@@ -14,7 +14,6 @@ Session.vim
 .netrwhist
 # auto-generated tag files
 tags
-
+resources
 .hugo_build.lock
-
 .DS_Store

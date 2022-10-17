@@ -1,6 +1,6 @@
 #!/bin/bash
 
-hugo --gc --minify -b "https://theden.github.io/thoughts.theden.sh/"
+hugo --cleanDestinationDir --gc --minify -b "https://theden.github.io/thoughts.theden.sh/"
 
 echo "Minifying everything we can"
 find ./public/ -type f \( \
