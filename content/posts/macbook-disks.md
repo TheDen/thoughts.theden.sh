@@ -6,10 +6,11 @@ draft: false
 ---
 
 
-Typically, to find the overall wear of a MacBook drive, one installs `smartctl` from [smartmontools](http://www.smartmontools.org/) via `brew install smartmontools` or `sudo port install smartmontools` 
-	
+Typically, to find the overall wear of a MacBook drive, one installs `smartctl` from [smartmontools](http://www.smartmontools.org/) via `brew install smartmontools` or `sudo port install smartmontools`
+
 Then by looking at the `Percentage Used` from the output of `smartctl -a /dev/disk0`
-``` 
+
+```text
 === START OF SMART DATA SECTION ===
 SMART overall-health self-assessment test result: PASSED
 
