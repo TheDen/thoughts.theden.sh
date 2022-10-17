@@ -1,4 +1,4 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description/><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2022, Ronalds Vilcins</copyright><lastBuildDate>Mon, 27 Jun 2022 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>Improve docker volume performance on MacOS with a RAM disk</title><link>https://theden.github.io/thoughts.theden.sh/posts/docker-ramdisk-macos-benchmark/</link><description>&lt;ul>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description>Denis Khoshaba's blog | theden.sh</description><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2022, Ronalds Vilcins</copyright><lastBuildDate>Mon, 27 Jun 2022 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>Improve docker volume performance on MacOS with a RAM disk</title><link>https://theden.github.io/thoughts.theden.sh/posts/docker-ramdisk-macos-benchmark/</link><description>&lt;ul>
 &lt;li>&lt;a href="#primer">Primer&lt;/a>&lt;/li>
 &lt;li>&lt;a href="#hardware">Hardware&lt;/a>&lt;/li>
 &lt;li>&lt;a href="#setup">Setup&lt;/a>&lt;/li>
@@ -212,7 +212,7 @@
 &lt;/ul>
 &lt;p>Here is the client on MacOS
 &lt;img
-src="https://theden.github.io/thoughts.theden.sh/images/wes.png"
+src="https://theden.github.io/thoughts.theden.sh/images/wes.webp"
 alt="Wes Montgomery on Plexamp"
 loading="lazy"
 decoding="async"

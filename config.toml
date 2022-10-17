@@ -2,3 +2,4 @@ baseURL = '/'
 languageCode = 'en-us'
 title = 'thoughts'
 theme = "listed"
+Params.description = "Denis Khoshaba's blog | theden.sh"

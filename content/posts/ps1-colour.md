@@ -1,6 +1,7 @@
 ---
 title: "Changing Your PS1's Prompt Based on The Previous Command's Return Value"
 date: 2021-06-25T21:17:06+10:00
+Description: "Changing shell's PS1 prompt based on the return code"
 draft: false
 ---
 

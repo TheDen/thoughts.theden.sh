@@ -1,6 +1,7 @@
 ---
 title: "WhatsApp Desktop attempts to access the camera on MacOS"
 date: "2022-01-06"
+Description: "WhatsApp Desktop attempts to access the camera on MacOS"
 draft: false
 ---
 

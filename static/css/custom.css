@@ -8,12 +8,16 @@ html {
     background-color: black;
 }
 
-/*body, code, pre {
-	font-family:  "console", "monospace", "Consolas", "Courier" !important;
-	font-size: 1em;
+h1 {
+  font-size: 1.5em!important;
 }
 
-*/
+h2 {
+  font-size: 1.25em!important;
+}
+.post {
+  font-size: 2em !important;
+}
 
 /* hype button */
 .button-hype {

@@ -1,5 +1,6 @@
 #!/bin/bash
 
+fixmyjs static/js/*
 hugo --cleanDestinationDir --gc --minify -b "https://theden.github.io/thoughts.theden.sh/"
 
 echo "Minifying everything we can"
