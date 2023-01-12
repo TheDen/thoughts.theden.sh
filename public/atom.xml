@@ -1,4 +1,103 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description>Denis Khoshaba's blog | theden.sh</description><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2022, Ronalds Vilcins</copyright><lastBuildDate>Mon, 27 Jun 2022 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>Improve docker volume performance on MacOS with a RAM disk</title><link>https://theden.github.io/thoughts.theden.sh/posts/docker-ramdisk-macos-benchmark/</link><description>&lt;ul>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description>Denis Khoshaba's blog | theden.sh</description><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2023, Ronalds Vilcins</copyright><lastBuildDate>Wed, 11 Jan 2023 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>Offbeat Documentaries I enjoyed watching</title><link>https://theden.github.io/thoughts.theden.sh/posts/offbeat-documentaries/</link><description>&lt;ul>
+&lt;li>&lt;a href="#confessions-of-a-superhero">Confessions of a Superhero&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#the-dungeon-masters">The Dungeon Masters&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#the-parking-lot-movie">The Parking Lot Movie&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#cinemania">Cinemania&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#american-movie">American Movie&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#american-juggalo">American Juggalo&lt;/a>&lt;/li>
+&lt;li>&lt;a href="#einsteins-brain">Einstein&amp;rsquo;s Brain&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;h1 id="confessions-of-a-superherohttpswwwimdbcomtitlett1016164">&lt;a href="https://www.imdb.com/title/tt1016164/">Confessions of a Superhero&lt;/a> &lt;a href="#confessions-of-a-superherohttpswwwimdbcomtitlett1016164" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>
+&lt;img
+src="https://theden.github.io/thoughts.theden.sh/images/confessions-of-a-superhero.webp"
+alt="confessions-of-a-superhero"
+loading="lazy"
+decoding="async"
+width="750"
+height="422"
+class="full-width"
+/>
+&lt;/p>
+&lt;p>Follows four people that dress up in superhero costumes and work on tips taking photos with tourists on Hollywood Boulevard. It starts off innocuous but descends into the personal lives and past of each character.&lt;/p>
+&lt;h1 id="the-dungeon-mastershttpswwwimdbcomtitlett0988086">&lt;a href="https://www.imdb.com/title/tt0988086/">The Dungeon Masters&lt;/a> &lt;a href="#the-dungeon-mastershttpswwwimdbcomtitlett0988086" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>
+&lt;img
+src="https://theden.github.io/thoughts.theden.sh/images/the-dungeon-masters.webp"
+alt=""
+loading="lazy"
+decoding="async"
+width="550"
+height="271"
+class="full-width"
+/>
+&lt;/p>
+&lt;p>Follows the lives of Dungeons &amp;amp; Dragons Gamemasters, aka Dungeon Masters. I particularly like Scott Corum&amp;rsquo;s story—his struggles on getting his fiction published and his desire to create something that he can be proud of before he dies.&lt;/p>
+&lt;h1 id="the-parking-lot-moviehttpswwwimdbcomtitlett1504300">&lt;a href="https://www.imdb.com/title/tt1504300/">The Parking Lot Movie&lt;/a> &lt;a href="#the-parking-lot-moviehttpswwwimdbcomtitlett1504300" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>
+&lt;img
+src="https://theden.github.io/thoughts.theden.sh/images/parking_lot_movie.webp"
+alt="Parking Lot Movie"
+loading="lazy"
+decoding="async"
+width="660"
+height="370"
+class="full-width"
+/>
+&lt;/p>
+&lt;p>On the struggles and lifestyle of a group of people that work in a parking lot in Charlottesville, Virginia near University of Virginia. I dug &lt;a href="https://www.youtube.com/watch?v=vtooQtLvC-4">Mark Schottinger&amp;rsquo;s tune&lt;/a>.&lt;/p>
+&lt;h1 id="cinemaniahttpswwwimdbcomtitlett0281724">&lt;a href="https://www.imdb.com/title/tt0281724/">Cinemania&lt;/a> &lt;a href="#cinemaniahttpswwwimdbcomtitlett0281724" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>
+&lt;img
+src="https://theden.github.io/thoughts.theden.sh/images/cinemania.webp"
+alt="cinemania.jpg"
+loading="lazy"
+decoding="async"
+width="620"
+height="347"
+class="full-width"
+/>
+&lt;/p>
+&lt;p>Documentary about the lives of five &lt;a href="https://en.wikipedia.org/wiki/Cinephilia">cinemaphiles&lt;/a> living in New York City. The fact that they manage their lives around watching as many films in NYC is equally impressive and exhausting.&lt;/p>
+&lt;h1 id="american-moviehttpswwwimdbcomtitlett0181288">&lt;a href="https://www.imdb.com/title/tt0181288/">American Movie&lt;/a> &lt;a href="#american-moviehttpswwwimdbcomtitlett0181288" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>
+&lt;img
+src="https://theden.github.io/thoughts.theden.sh/images/american-movie.webp"
+alt="American Movie"
+loading="lazy"
+decoding="async"
+width="1000"
+height="750"
+class="full-width"
+/>
+&lt;/p>
+&lt;p>Follows aspiring filmmaker Mark Borchardt (and friends) attempt at completing the low-budget horror film &lt;em>Coven&lt;/em> in middle America.&lt;/p>
+&lt;h1 id="american-juggalohttpswwwimdbcomtitlett2062478">&lt;a href="https://www.imdb.com/title/tt2062478/">American Juggalo&lt;/a> &lt;a href="#american-juggalohttpswwwimdbcomtitlett2062478" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>
+&lt;img
+src="https://theden.github.io/thoughts.theden.sh/images/american-juggalo.webp"
+alt="american juggalo"
+loading="lazy"
+decoding="async"
+width="500"
+height="316"
+class="full-width"
+/>
+&lt;/p>
+&lt;p>Documentary on Juggalos (hardcore Insane Clown Posse fans) that attend the once a year event called The Gathering of the Juggalos. &lt;a href="https://vimeo.com/29589320">You can watch on Vimeo&lt;/a>.&lt;/p>
+&lt;h1 id="einsteins-brainhttpswwwimdbcomtitlett0192519">&lt;a href="https://www.imdb.com/title/tt0192519/">Einstein&amp;rsquo;s Brain&lt;/a> &lt;a href="#einsteins-brainhttpswwwimdbcomtitlett0192519" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>
+&lt;img
+src="https://theden.github.io/thoughts.theden.sh/images/einstein-brain.webp"
+alt="Einstein&amp;amp;rsquo;s Brain"
+loading="lazy"
+decoding="async"
+width="1424"
+height="2072"
+class="full-width"
+/>
+&lt;/p>
+&lt;p>Follows eccentric Japanese professor Kenji Sugimoto on his travels to the United States to find where Einstein&amp;rsquo;s brain is stored.&lt;/p></description><author>ronalds.vilcins@gmail.com (Ronalds Vilcins)</author><guid>https://theden.github.io/thoughts.theden.sh/posts/offbeat-documentaries/</guid><pubDate>Wed, 11 Jan 2023 00:00:00 +0000</pubDate></item><item><title>Improve docker volume performance on MacOS with a RAM disk</title><link>https://theden.github.io/thoughts.theden.sh/posts/docker-ramdisk-macos-benchmark/</link><description>&lt;ul>
 &lt;li>&lt;a href="#primer">Primer&lt;/a>&lt;/li>
 &lt;li>&lt;a href="#hardware">Hardware&lt;/a>&lt;/li>
 &lt;li>&lt;a href="#setup">Setup&lt;/a>&lt;/li>
