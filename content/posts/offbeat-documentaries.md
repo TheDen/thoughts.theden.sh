@@ -1,5 +1,5 @@
 ---
-title: "Offbeat Documentaries I enjoyed watching"
+title: "Offbeat Documentaries I Enjoyed Watching"
 Description: "Offbeat Documentaries worth watching"
 date: "2023-01-11"
 draft: false
