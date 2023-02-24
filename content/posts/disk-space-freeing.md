@@ -45,9 +45,9 @@ rm -r ~/Library/Developer/Xcode/DerivedData/*/
 ```
 
 For cached files 
-```bashg
+```bash
 rm -rf ~/Library/Developer/CoreSimulator/Caches/dyld/*/*/
-``
+```
 
 ```bash
 xcrun simctl delete unavailable

@@ -18,11 +18,9 @@ remove old versions of installed formulae&lt;/li>
 &lt;p>To delete the derived data&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>rm -r ~/Library/Developer/Xcode/DerivedData/*/
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For cached files&lt;/p>
-&lt;pre tabindex="0">&lt;code class="language-bashg" data-lang="bashg">rm -rf ~/Library/Developer/CoreSimulator/Caches/dyld/*/*/
-``
-```bash
-xcrun simctl delete unavailable
-&lt;/code>&lt;/pre>&lt;h1 id="flush-the-dns-cache">Flush the DNS cache &lt;a href="#flush-the-dns-cache" class="hash g">#&lt;/a>&lt;/h1>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>rm -rf ~/Library/Developer/CoreSimulator/Caches/dyld/*/*/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>xcrun simctl delete unavailable
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="flush-the-dns-cache">Flush the DNS cache &lt;a href="#flush-the-dns-cache" class="hash g">#&lt;/a>&lt;/h1>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>sudo dscacheutil -flushcache &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> sudo killall -HUP mDNSResponder
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="cups-printer-job-cache">CUPS Printer Job Cache &lt;a href="#cups-printer-job-cache" class="hash g">#&lt;/a>&lt;/h1>
 &lt;p>To delete your printer job cache&lt;/p>
