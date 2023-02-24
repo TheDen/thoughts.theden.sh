@@ -1,4 +1,39 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description>Denis Khoshaba's blog | theden.sh</description><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2023, Ronalds Vilcins</copyright><lastBuildDate>Wed, 11 Jan 2023 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>Offbeat Documentaries I Enjoyed Watching</title><link>https://theden.github.io/thoughts.theden.sh/posts/offbeat-documentaries/</link><description>&lt;ul>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description>Denis Khoshaba's blog | theden.sh</description><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2023, Ronalds Vilcins</copyright><lastBuildDate>Mon, 13 Feb 2023 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>Free Up Disk Space on MacOS</title><link>https://theden.github.io/thoughts.theden.sh/posts/disk-space-freeing/</link><description>&lt;p>Ignoring system caches, and logs in general for safety.&lt;/p>
+&lt;h1 id="brews-cache">Brew&amp;rsquo;s Cache &lt;a href="#brews-cache" class="hash g">#&lt;/a>&lt;/h1>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>brew cleanup --prune&lt;span style="color:#f92672">=&lt;/span>all -s
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;code>brew cleanup&lt;/code> Remove stale lock files and outdated downloads for all formulae and casks, and
+remove old versions of installed formulae&lt;/li>
+&lt;li>&lt;code>--prune=all&lt;/code> removes everything (not up only a specified age, otherwise set by the env var &lt;code>HOMEBREW_CLEANUP_MAX_AGE_DAYS&lt;/code>)&lt;/li>
+&lt;li>&lt;code>-s&lt;/code>: Scrub the cache, including downloads for even the latest versions. Note that downloads forany installed formulae or casks will still not be deleted&lt;/li>
+&lt;li>&lt;code>--dry-run&lt;/code> can be used to see what would be removed&lt;/li>
+&lt;/ul>
+&lt;h1 id="the-librarycaches-folder">The &lt;code>~/Library/Caches/&lt;/code> Folder &lt;a href="#the-librarycaches-folder" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>Though one could be brutal and wipe the entire folder&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>sudo rm -rfv ~/Library/Caches/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>It may have unintended consequences, it&amp;rsquo;s better to only delete the larger folders/files, i.e.,&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>sudo du -sm ~/Library/Caches/* 2&amp;gt; /dev/null | sort -n
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>Will list the folders in the directory sorted by size in MBs.&lt;/p>
+&lt;h1 id="xcode-cache-data">Xcode Cache Data &lt;a href="#xcode-cache-data" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>To delete the derived data&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>rm -r ~/Library/Developer/Xcode/DerivedData/*/
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>For cached files&lt;/p>
+&lt;pre tabindex="0">&lt;code class="language-bashg" data-lang="bashg">rm -rf ~/Library/Developer/CoreSimulator/Caches/dyld/*/*/
+``
+```bash
+xcrun simctl delete unavailable
+&lt;/code>&lt;/pre>&lt;h1 id="flush-the-dns-cache">Flush the DNS cache &lt;a href="#flush-the-dns-cache" class="hash g">#&lt;/a>&lt;/h1>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>sudo dscacheutil -flushcache &lt;span style="color:#f92672">&amp;amp;&amp;amp;&lt;/span> sudo killall -HUP mDNSResponder
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="cups-printer-job-cache">CUPS Printer Job Cache &lt;a href="#cups-printer-job-cache" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>To delete your printer job cache&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>rm /var/spool/cups/cache/job.cache*
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="quicklook-thumbnail">QuickLook Thumbnail &lt;a href="#quicklook-thumbnail" class="hash g">#&lt;/a>&lt;/h1>
+&lt;p>Using the QuickLook Server debug and management tool&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>qlmanage -r cache
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
+&lt;li>&lt;code>-r&lt;/code> resets Quick Look Server and all Quick Look client&amp;rsquo;s generator cache&lt;/li>
+&lt;li>&lt;a href="https://objective-see.org/blog/blog_0x30.html">For more a more in-depth guide on cleaning QuickLooks and how it can leak encrypted data&lt;/a>&lt;/li>
+&lt;/ul></description><author>ronalds.vilcins@gmail.com (Ronalds Vilcins)</author><guid>https://theden.github.io/thoughts.theden.sh/posts/disk-space-freeing/</guid><pubDate>Mon, 13 Feb 2023 00:00:00 +0000</pubDate></item><item><title>Offbeat Documentaries I Enjoyed Watching</title><link>https://theden.github.io/thoughts.theden.sh/posts/offbeat-documentaries/</link><description>&lt;ul>
 &lt;li>&lt;a href="#confessions-of-a-superhero">Confessions of a Superhero&lt;/a>&lt;/li>
 &lt;li>&lt;a href="#the-dungeon-masters">The Dungeon Masters&lt;/a>&lt;/li>
 &lt;li>&lt;a href="#the-parking-lot-movie">The Parking Lot Movie&lt;/a>&lt;/li>
