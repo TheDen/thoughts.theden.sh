@@ -66,4 +66,11 @@ h2 {
 	.button-hype {
 		padding: 0.25em 0.75em;
 	}
+	code, pre {
+		overflow: auto;
+	}
+}
+
+code, pre {
+	overflow: auto !important;
 }
