@@ -1,4 +1,17 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description>Denis Khoshaba's blog | theden.sh</description><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2023, Ronalds Vilcins</copyright><lastBuildDate>Mon, 13 Feb 2023 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>Free Up Disk Space on MacOS</title><link>https://theden.github.io/thoughts.theden.sh/posts/disk-space-freeing/</link><description>&lt;p>Ignoring system caches, and logs in general for safety.&lt;/p>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>thoughts</title><description>Denis Khoshaba's blog | theden.sh</description><link>https://theden.github.io/thoughts.theden.sh/</link><language>en</language><copyright>Copyright 2023, Ronalds Vilcins</copyright><lastBuildDate>Sat, 20 May 2023 00:00:00 +0000</lastBuildDate><generator>Hugo - gohugo.io</generator><docs>http://cyber.harvard.edu/rss/rss.html</docs><atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/><item><title>Searching GitHub for OpenAI API Keys</title><link>https://theden.github.io/thoughts.theden.sh/posts/openai-api-keys/</link><description>&lt;p>OpenAI API keys in the format&lt;/p>
+&lt;pre tabindex="0">&lt;code>sk-&amp;lt;40 case-sensitive alphanumeric characters&amp;gt;
+&lt;/code>&lt;/pre>&lt;p>A simple regular expression for this would be&lt;/p>
+&lt;pre tabindex="0">&lt;code>/sk-[a-zA-Z0-9]{40,}/
+&lt;/code>&lt;/pre>&lt;p>i.e., match any string that starts with &amp;ldquo;sk-&amp;rdquo; followed by at least 40 alphanumeric characters.&lt;/p>
+&lt;p>GitHub allows &lt;a href="https://docs.github.com/en/search-github/github-code-search/understanding-github-code-search-syntax#using-regular-expressions">regular expression search&lt;/a>, but note that if the search is too expensive you&amp;rsquo;ll get a 5XX. I noticed modifying it to limit to the start of a line, i.e., &lt;code>/^sk-[a-zA-Z0-9]{40,}/&lt;/code> yields results.&lt;/p>
+&lt;p>&lt;a href="https://github.com/search?q=%2F%5Esk-%5Ba-zA-Z0-9%5D%7B40%2C%7D%2F&amp;amp;type=code">Click here to search for OpenAI API keys&lt;/a>&lt;/p>
+&lt;p>Right now it should return a few results. A few thoughts&lt;/p>
+&lt;ul>
+&lt;li>I&amp;rsquo;m not sure if GitHub is sending alerts for API keys being committed to codebases. They absolutely should if they&amp;rsquo;re not&lt;/li>
+&lt;li>OpenAI should allow permission scoping of API keys&lt;/li>
+&lt;li>Limiting API keys based on IP CIDR ranges&lt;/li>
+&lt;/ul>
+&lt;p>Fin.&lt;/p></description><author>ronalds.vilcins@gmail.com (Ronalds Vilcins)</author><guid>https://theden.github.io/thoughts.theden.sh/posts/openai-api-keys/</guid><pubDate>Sat, 20 May 2023 00:00:00 +0000</pubDate></item><item><title>Free Up Disk Space on MacOS</title><link>https://theden.github.io/thoughts.theden.sh/posts/disk-space-freeing/</link><description>&lt;p>Ignoring system caches, and logs in general for safety.&lt;/p>
 &lt;h1 id="brews-cache">Brew&amp;rsquo;s Cache &lt;a href="#brews-cache" class="hash g">#&lt;/a>&lt;/h1>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>brew cleanup --prune&lt;span style="color:#f92672">=&lt;/span>all -s
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;ul>
