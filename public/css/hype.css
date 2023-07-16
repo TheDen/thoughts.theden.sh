@@ -1,5 +1,1 @@
-*,
-*:before,
-*:after {
-  cursor: url(/images/cursor.png), auto;
-}
+*,*:before,*:after{cursor:url(/images/cursor.png),auto}

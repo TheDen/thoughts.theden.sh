@@ -231,7 +231,6 @@ class="full-width"
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Capacity: 5.37 GB &lt;span style="color:#f92672">(&lt;/span>5,368,664,064 bytes&lt;span style="color:#f92672">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> BSD Name: disk0s3
 &lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span> Content: Apple_APFS_Recovery
-&lt;/span>&lt;/span>&lt;span style="display:flex;">&lt;span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h1 id="setup">Setup &lt;a href="#setup" class="hash g">#&lt;/a>&lt;/h1>
 &lt;p>First we create a regular folder within the NVMe mount to test the standard docker volume&lt;/p>
 &lt;div class="highlight">&lt;pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">&lt;code class="language-bash" data-lang="bash">&lt;span style="display:flex;">&lt;span>mkdir ~/docker-test-volume/
