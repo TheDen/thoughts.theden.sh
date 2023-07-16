@@ -1,6 +1,6 @@
 #!/bin/bash
 # Script to create webp versions of images. WebP will be created in the
-# same location and with the smae filename but with the .webp extension
+# same location and with the same filename but with the .webp extension
 # Requires cwebp https://developers.google.com/speed/webp/download
 
 set -eo pipefail
