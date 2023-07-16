@@ -73,10 +73,12 @@ h2 {
   code,
   pre {
     overflow: auto;
+    text-wrap: wrap;
   }
 }
 
 code,
 pre {
   overflow: auto !important;
+  text-wrap: wrap;
 }
