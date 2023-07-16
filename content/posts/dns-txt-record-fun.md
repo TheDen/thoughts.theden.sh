@@ -13,8 +13,8 @@ Reading through the RFC [Using the Domain Name System To Store Arbitrary String 
 More importantly, on the `restrictions` section
 
 > Some DNS server implementations place limits on the size or number of TXT records associated with a particular owner. Certain implementations may not support TXT records at all.
->
-> However in [rfc4408 section-3.1.3](https://thoughts.theden.sh/post/dns-txt-record-hacks/) a limit is explicitly stated
+
+However in [rfc4408 section-3.1.3](https://tools.ietf.org/html/rfc4408) a limit is explicitly stated
 
 > SPF or TXT records containing multiple strings are useful in constructing records that would exceed the 255-byte maximum length of a string within a single TXT or SPF RR record.
 
