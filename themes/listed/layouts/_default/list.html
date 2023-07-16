@@ -8,7 +8,7 @@
     {{ partial "header.html" . }}
     <section>
       <ul reversed class="list">
-        {{ range (.Paginate ( where .Site.RegularPages "Section" "posts" ).ByDate.Reverse).Pages }}
+        {{ range (( where .Site.RegularPages "Section" "posts" ).ByDate.Reverse) }}
           {{ if ne .Kind "section" }}
           <li>
             <a class="link" href="{{ .Permalink }}" title="{{ .Title }}">{{ .Title }}
