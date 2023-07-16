@@ -5,9 +5,10 @@ Description: "Unix philosophy + frontend"
 draft: false
 ---
 
-[Ongoing. I'll be adding for snippets to this page that I find useful over time  [Suggestions are also welcome](https://github.com/TheDen/thoughts.theden.sh)]
+[Ongoing. I'll be adding for snippets to this page that I find useful over time [Suggestions are also welcome](https://github.com/TheDen/thoughts.theden.sh)]
 
 # Creating WebP images
+
 If you want to recursively create `.webp` versions of images in a folder (same name, saved in same location, different extension name), this script will do that
 
 ```bash
@@ -18,10 +19,9 @@ done < <(find ./ -type f \( -name "*.png" -o -name "*.jpg" \) -print0)
 
 Some notes:
 
-* The `cwebp` binary from [libwebp](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html) is required.
-* The `-q 90` flag is the quality factor.
-* The snippet assumes that image files are either `.jpg` or `.png`.
-
+- The `cwebp` binary from [libwebp](https://storage.googleapis.com/downloads.webmproject.org/releases/webp/index.html) is required.
+- The `-q 90` flag is the quality factor.
+- The snippet assumes that image files are either `.jpg` or `.png`.
 
 # Deployment
 
@@ -37,8 +37,7 @@ and to push the folder as a specific git branch, for example to deploy it on Git
 git subtree push --prefix dist origin gh-pages
 ```
 
-
-# Minification 
+# Minification
 
 Using the [minify](https://github.com/tdewolff/minify) cli tool, this example snippet will minify any assets in the `dist/` folder. Files that contain `.min` will be excluded
 

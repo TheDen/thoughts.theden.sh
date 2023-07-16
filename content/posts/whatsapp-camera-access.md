@@ -9,8 +9,7 @@ I use [Micro Snitch](https://www.obdev.at/products/microsnitch/index.html), a ne
 
 I noticed whenever I open WhatsApp Desktop on Macos it triggers the overlay notification even though WhatsApp doesn't use the camera, and AFAIK WhatsApp on the desktop does not use video.
 
-Digging deeper, we can use `lsof` after restarting WhatsApp to see what it's trying to do 
-
+Digging deeper, we can use `lsof` after restarting WhatsApp to see what it's trying to do
 
 ```bash
 $ lsof  | grep -i whatsapp | grep -i camera
@@ -23,4 +22,3 @@ WhatsApp  21532  den  txt       REG               1,14     313915            387
 Now it's opening the regular files (`REG`) with the file descriptor reporting as `txt`, i.e., program text (code and data) according to the `lsof` man page.
 
 I'm not sure why WhatsApp Desktop attempts to read `AppleCamera`, it's definitely not an electron thing since other well-known electron apps don't have this behaviour.
-

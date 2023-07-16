@@ -5,8 +5,7 @@ description: "Free Up Disk Space on MacOS"
 draft: false
 ---
 
-Ignoring system caches, and logs in general for safety. 
-
+Ignoring system caches, and logs in general for safety.
 
 # Brew's Cache
 
@@ -14,17 +13,16 @@ Ignoring system caches, and logs in general for safety.
 brew cleanup --prune=all -s
 ```
 
-* `brew cleanup` Remove stale lock files and outdated downloads for all formulae and casks, and
-remove old versions of installed formulae
-* `--prune=all` removes everything (not up only a specified age, otherwise set by the env var `HOMEBREW_CLEANUP_MAX_AGE_DAYS`)	
-* `-s`: Scrub the cache, including downloads for even the latest versions. Note that downloads forany installed formulae or casks will still not be deleted
-* `--dry-run` can be used to see what would be removed 
-
+- `brew cleanup` Remove stale lock files and outdated downloads for all formulae and casks, and
+  remove old versions of installed formulae
+- `--prune=all` removes everything (not up only a specified age, otherwise set by the env var `HOMEBREW_CLEANUP_MAX_AGE_DAYS`)
+- `-s`: Scrub the cache, including downloads for even the latest versions. Note that downloads forany installed formulae or casks will still not be deleted
+- `--dry-run` can be used to see what would be removed
 
 # The `~/Library/Caches/` Folder
 
 Though one could be brutal and wipe the entire folder
- 
+
 ```bash
 sudo rm -rfv ~/Library/Caches/
 ```
@@ -40,11 +38,13 @@ Will list the folders in the directory sorted by size in MBs.
 # Xcode Cache Data
 
 To delete the derived data
+
 ```bash
 rm -r ~/Library/Developer/Xcode/DerivedData/*/
 ```
 
-For cached files 
+For cached files
+
 ```bash
 rm -rf ~/Library/Developer/CoreSimulator/Caches/dyld/*/*/
 ```
@@ -53,7 +53,7 @@ rm -rf ~/Library/Developer/CoreSimulator/Caches/dyld/*/*/
 xcrun simctl delete unavailable
 ```
 
-# Flush the DNS cache 
+# Flush the DNS cache
 
 ```bash
 sudo dscacheutil -flushcache && sudo killall -HUP mDNSResponder
@@ -67,7 +67,7 @@ To delete your printer job cache
 rm /var/spool/cups/cache/job.cache*
 ```
 
-# QuickLook Thumbnail 
+# QuickLook Thumbnail
 
 Using the QuickLook Server debug and management tool
 
@@ -75,5 +75,5 @@ Using the QuickLook Server debug and management tool
 qlmanage -r cache
 ```
 
-* `-r` resets Quick Look Server and all Quick Look client's generator cache
-* [For more a more in-depth guide on cleaning QuickLooks and how it can leak encrypted data](https://objective-see.org/blog/blog_0x30.html)
+- `-r` resets Quick Look Server and all Quick Look client's generator cache
+- [For more a more in-depth guide on cleaning QuickLooks and how it can leak encrypted data](https://objective-see.org/blog/blog_0x30.html)

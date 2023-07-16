@@ -9,11 +9,11 @@ draft: false
 - [Hardware](#hardware)
 - [Setup](#setup)
 - [Random Read and write performance](#random-read-and-write-performance)
-  * [Standard volume](#standard-volume)
-  * [RAM Disk](#ram-disk)
+  - [Standard volume](#standard-volume)
+  - [RAM Disk](#ram-disk)
 - [I/0 latency](#i0-latency)
-  * [Standard volume](#standard-volume-1)
-  * [RAM Disk](#ram-disk-1)
+  - [Standard volume](#standard-volume-1)
+  - [RAM Disk](#ram-disk-1)
 - [Cleanup](#cleanup)
 - [Results](#results)
 
@@ -21,12 +21,11 @@ draft: false
 
 Whilst docker does support [tmpfs](https://docs.docker.com/storage/tmpfs/) natively, it's only available if you're running docker on linux. A use-case for using a ram disk, as described in the documentation:
 
-
->If your container generates non-persistent state data, consider using a tmpfs mount to avoid storing the data anywhere permanently, and to increase the container’s performance by avoiding writing into the container’s writable layer.
+> If your container generates non-persistent state data, consider using a tmpfs mount to avoid storing the data anywhere permanently, and to increase the container’s performance by avoiding writing into the container’s writable layer.
 
 However, we can still create a RAM disk in MacOS and mount it within docker. I'll mount a RAM disk and a standard docker volume and measuring the performance of both to compare.
 
-# Hardware 
+# Hardware
 
 My M1 Macbook Air's current sysinfo (unrelated info redacted)
 
@@ -61,7 +60,7 @@ Hardware:
       Hardware UUID: <REDACTED>
       Provisioning UDID: <REDACTED>
       Activation Lock Status: Enabled
-      
+
 NVMExpress:
 
     Apple SSD Controller:
@@ -90,10 +89,9 @@ NVMExpress:
             disk0s3:
               Capacity: 5.37 GB (5,368,664,064 bytes)
               BSD Name: disk0s3
-              Content: Apple_APFS_Recovery 
-      
-```
+              Content: Apple_APFS_Recovery
 
+```
 
 # Setup
 
@@ -115,7 +113,7 @@ Mounting disk
 Finished erase on disk7 (ramdisk)
 ```
 
-Now we'll create an `alpine` docker container mounting both volumes and install the required benchmarking software 
+Now we'll create an `alpine` docker container mounting both volumes and install the required benchmarking software
 
 ```bash
 docker run -v "${HOME}/docker-test-volume/:/std-volume" -v "/Volumes/ramdisk/:/ramdisk" -it alpine sh
@@ -123,14 +121,14 @@ docker run -v "${HOME}/docker-test-volume/:/std-volume" -v "/Volumes/ramdisk/:/r
 
 # Random Read and write performance
 
-We'll be using [fio](https://github.com/axboe/fio) for benchmarking read/write performance 
-
+We'll be using [fio](https://github.com/axboe/fio) for benchmarking read/write performance
 
 ```bash
 apk add ioping
 ```
 
 ## Standard volume
+
 ```bash
 /std-volume # fio --randrepeat=1 --ioengine=libaio --direct=1 --gtod_reduce=1 --name=test --filename=test --bs=4k --iodepth=64 --size=1G --readwrite=randrw --rwmixread=75
 test: (g=0): rw=randrw, bs=(R) 4096B-4096B, (W) 4096B-4096B, (T) 4096B-4096B, ioengine=libaio, iodepth=64
@@ -190,7 +188,6 @@ Run status group 0 (all jobs):
 
 We also can use [IOPing](https://github.com/koct9i/ioping) to monitor I/O latency in real time, as a basic heuristic.
 
-
 ```bash
 apk add ioping
 ```
@@ -216,9 +213,7 @@ generated 10 requests in 9.00 s, 40 KiB, 1 iops, 4.44 KiB/s
 min/avg/max/mdev = 254.2 us / 334.5 us / 396.4 us / 46.5 us
 ```
 
-
 ## RAM Disk
-
 
 ```bash
 /ramdisk # ioping -c 10 .
