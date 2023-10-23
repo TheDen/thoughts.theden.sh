@@ -7,7 +7,7 @@ set -eo pipefail
 
 webp_cli="cwebp"
 if ! command -v "${webp_cli}" &> /dev/null; then
-  echo "${cwebp_cli} is not installed"
+  echo "${webp_cli} is not installed"
   exit
 fi
 
