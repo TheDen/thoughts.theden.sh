@@ -5,6 +5,8 @@ hugo --cleanDestinationDir --gc --minify -b "https://theden.github.io/thoughts.t
 echo "run prettier"
 prettier -w .
 
+cpu_cores="$(nproc)"
+
 echo "Minifying everything we can"
 find ./public/ -type f \( \
   -name "*.html" \
@@ -13,9 +15,9 @@ find ./public/ -type f \( \
   -o -name '*.svg' \
   -o -name "*.xml" \
   -o -name "*.json" \
-  -o -name "*.htm" \
+  -o -name "*.html" \
   \) \
   -and ! -name "*.min*" -print0 |
-  xargs -0 -n1 -P4 -I '{}' sh -c 'minify -o "{}" "{}"'
+  xargs -0 -n1 -P"${cpu_cores}" -I '{}' sh -c 'minify -o "{}" "{}"'
 
 cp CNAME public/

@@ -11,7 +11,7 @@ if ! command -v "${webp_cli}" &> /dev/null; then
   exit
 fi
 
-webp_quality=100
+webp_quality=90
 
 while IFS= read -r -d '' file; do
   cwebp -q "${webp_quality}" "$file" -o "${file%.*}.webp" || true
