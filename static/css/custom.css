@@ -178,6 +178,9 @@ pre {
   border: none;
   height: 2px;
   border-style: solid !important;
+  border-color: #096 !important;
+  border-style: solid !important;
+  border-width: 0.1px !important;
 }
 
 a {
