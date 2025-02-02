@@ -7,6 +7,7 @@
 	font-display: swap;
 }
 */
+
 a:hover {
   text-decoration: none;
   color: black !important;
@@ -24,6 +25,12 @@ header ul a:first-child {
 
 blockquote {
   font-style: italic !important;
+  color: #d07900 !important;
+}
+
+* {
+  font-family: "Space Grotesk" !important;
+  font-weight: 400 !important;
 }
 
 html {
@@ -32,13 +39,41 @@ html {
 
 h1 {
   font-size: 1.5em !important;
+  font-weight: bold !important;
 }
 
 h2 {
   font-size: 1.25em !important;
+  font-weight: bold !important;
 }
+
 .post {
   font-size: 2em !important;
+  background-color: #d07900 !important;
+  color: black !important;
+  padding: 0.5em;
+  font-weight: bold !important;
+  border-top-right-radius: 2em !important;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  background-color: #096;
+  color: black !important;
+  border-top-right-radius: 2em !important;
+  padding-left: 0.5em !important;
+}
+
+code {
+  font-size: 1em !important;
+}
+
+li {
+  padding-bottom: 0.5em !important;
 }
 
 /* hype button */
@@ -49,7 +84,7 @@ h2 {
   text-transform: uppercase;
   color: #000;
   border: 3px solid;
-  padding: 0.25em 0.5em;
+  padding: 0.25em 0.5em !important;
   box-shadow:
     1px 1px 0px 0px,
     2px 2px 0px 0px,
@@ -62,6 +97,7 @@ h2 {
   touch-action: manipulation;
   background-color: black;
   color: #096;
+  float: right !important;
 }
 
 .button-hype:active {
@@ -85,4 +121,18 @@ code,
 pre {
   overflow: auto !important;
   text-wrap: wrap;
+}
+
+.hype-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-direction: row-reverse;
+}
+
+.hr-list {
+  flex-grow: 1;
+  border: none;
+  height: 2px;
+  background-color: #ccc;
 }

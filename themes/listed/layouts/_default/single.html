@@ -2,14 +2,12 @@
 <html lang="en">
   {{ partial "head.html" . }}
 <body>
-
+</main>
   <a class="skip-link" href="#main">Skip to main</a>
 <main id="main">
   <div class="content">
     {{ partial "header.html" . }}
-  <div style="float: right; padding-top: 1em;">
-    <button onclick="hype()"class="button-hype" role="button">HYPE</button>
-  </div>
+
       {{ if eq .Type "photos" }}
       <h2>{{ .Title }}</h2>
       {{ end }}
@@ -48,7 +46,6 @@
       </ul>
       {{ end }}
   </div>
-  <div class="giscus" style="max-width: 70ch; justify-self: center;"></div>
-</main>
+  <div class="giscus" style="max-width: 70ch; justify-self: center; margin-bottom: 1em;"></div>
 </body>
 </html>
