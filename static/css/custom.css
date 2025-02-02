@@ -68,7 +68,7 @@ header ul a:first-child {
 
 blockquote {
   font-style: italic !important;
-  color: #d07900 !important;
+  color: #0062d0 !important;
 }
 
 * {
@@ -177,7 +177,6 @@ pre {
   flex-grow: 1;
   border: none;
   height: 2px;
-  background-color: #ccc;
 }
 
 a {
@@ -188,4 +187,12 @@ a {
 
 .hash {
   color: unset !important;
+}
+
+.main-links {
+  color: #d07900 !important;
+}
+.main-links:hover {
+  background-color: #d07900 !important;
+  color: black !important;
 }
