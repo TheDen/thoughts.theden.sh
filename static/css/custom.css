@@ -177,6 +177,7 @@ pre {
   flex-grow: 1;
   border: none;
   height: 2px;
+  border-style: solid !important;
 }
 
 a {
