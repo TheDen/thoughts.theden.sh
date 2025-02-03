@@ -1,6 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
   {{ partial "head.html" . }}
+  <script src="https://unpkg.com/powerglitch@2.4.0/dist/powerglitch.min.js"></script>
+  <style>
+        .container {
+          position: relative;
+          justify-content: center;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-direction: row-reverse;
+          flex-flow: column;
+        }
+        .glitch-text {
+          font-size: 10rem;
+          font-weight: bold;
+          text-transform: uppercase;
+        }
+        .message {
+          font-size: 1.5rem;
+          margin-top: 20px;
+          opacity: 0.7;
+        }
+
+        .glitch-text {
+          position: relative;
+          display: inline-block;
+          overflow: hidden;
+          color: #a10000 !important
+        }
+
+  </style>
   <body>
     <a class="skip-link" href="#main">Skip to main</a>
     <main id="main">
@@ -9,11 +39,52 @@
 
         <!-- post -->
 
-        <p>The page you requested doesn't exist.</p>
+        <h1 style="background-color: unset !important; color: #d07900 !important;" >The page you requested does not exist :(</h1>
 
         <!-- / post -->
         <!--{{ partial "footer.html" . }}-->
+
+        <div class="container">
+          <div class="glitch-text" >404</div>
+          <br>
+          <div class="glitch-text" style="color:#a9d000 !important;" >404</div>
+          <br>
+          <div class="glitch-text" style="color:#0035d0 !important;" >404</div>
+        </div>
       </div>
+
+
+    <script>
+        function getRandom(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        document.querySelectorAll('.glitch-text').forEach(element => {
+            PowerGlitch.glitch(element, {
+                playMode: 'always',
+                timing: {
+                    duration: getRandom(1000, 3000), // Random duration between 1-3 seconds
+                    iterations: Infinity,
+                },
+                glitchTimeSpan: {
+                    start: 0,
+                    end: 0.1
+                },
+                shake: {
+                    velocity: getRandom(5, 20), // Random velocity
+                    amplitudeX: getRandom(3, 10), // Random X shake
+                    amplitudeY: getRandom(3, 10), // Random Y shake
+                },
+                slice: {
+                    count: Math.floor(getRandom(5, 15)), // Random number of slices
+                    velocity: getRandom(5, 20), // Random slice movement
+                    minHeight: getRandom(5, 15), // Random slice height
+                    maxHeight: getRandom(15, 30),
+                    hueRotate: true,
+                }
+            });
+        });
+      </script>
     </main>
   </body>
 </html>
