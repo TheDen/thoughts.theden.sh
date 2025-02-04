@@ -9,7 +9,7 @@ draft: false
 Committing dotfiles to a public git repository is now pretty common. Oftentimes people include their `.bashrc` without much thought. However, information in one's `bashrc` could potentially leak sensitive information — for example:
 
 - `ssh` connection aliases that expose server IPs/hostnames, usernames, and potentially private key locations and ciphers
-- AWS account IDs via aliases and functions, for example when a user aliases authentication with ECR — [a basic GitHub search reveals many in the wild](https://github.com/search?q=%22amazonaws.com%22+path%3A.bashrc&type=code)
+- AWS account IDs via aliases and functions, for example when a user aliases authentication with ECR — [a basic GitHub search reveals many in the wild](https://github.com/search?q=%22amazonaws.com%22+%22docker+login%22+path%3A.bashrc&type=code)
 - A list of installed software on machine, via aliases, completions, functions etc.
 - Absolute paths could reveal the home directory — exposing the user `id` name
 - Aliases that leak server information, for example `kubectl` aliases could reference a cluster name, or namespaces, deployments etc.
