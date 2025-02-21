@@ -5,7 +5,7 @@ function hype() {
   } else {
     document.getElementById("hype").disabled = false;
     if (typeof music === "undefined") {
-      music = new Audio("/music/gosh.mp3");
+      music = new Audio("/music/rev.mp3");
     }
     music.play();
   }
