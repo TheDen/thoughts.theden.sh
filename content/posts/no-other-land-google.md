@@ -15,7 +15,7 @@ So, how did I find it on [archive.org](https://archive.org)? Well, definitely n
 Here's are the results if you search `No other land archive.org` on Google:
 
 ![No other land Google search](/images/NoL-gsearch1.jpg)
-The first result is a song, but no sign of the movie. Nothing on page 2, 3, 4, etc.
+The first result is a song, but no sign of the film. Nothing on page 2, 3, 4, etc.
 
 Let's give Google Search the benefit of the doubt by searching `"No Other Land" site:archive.org`
 
