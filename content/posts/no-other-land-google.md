@@ -4,7 +4,7 @@ date: "2025-05-08"
 draft: false
 ---
 
-I was looking to watch documentary [No Other Land](https://en.wikipedia.org/wiki/No_Other_Land) — from the wiki:
+I was looking to watch the documentary [No Other Land](https://en.wikipedia.org/wiki/No_Other_Land) — from the wiki:
 
 > [No Other land] was recorded between 2019 and 2023 and shows the destruction of a Palestinian community in the occupied West Bank, which had been resisting forced displacement after an Israeli "firing zone" was declared on their land.
 
