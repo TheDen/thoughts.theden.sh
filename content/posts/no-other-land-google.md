@@ -8,7 +8,7 @@ I was looking to watch the documentary [No Other Land](https://en.wikipedia.org/
 
 > [No Other land] was recorded between 2019 and 2023 and shows the destruction of a Palestinian community in the occupied West Bank, which had been resisting forced displacement after an Israeli "firing zone" was declared on their land.
 
-While not widely available for streaming, fortunately it's readily available on the Internet Archive — even one version seems to be [uploaded by Base Adra](https://archive.org/details/nootherland_202503), one of the directors of the film.
+While not widely available for streaming, fortunately it's readily available on the Internet Archive — even one version seems to be [uploaded by Basel Adra](https://archive.org/details/nootherland_202503), one of the directors of the film.
 
 So, how did I find it on [archive.org](https://archive.org)? Well, definitely not via Google Search.
 
