@@ -1,5 +1,5 @@
 ---
-title: 'You Can Watch "No Other Land" Online — But Not If You Google It'
+title: 'You Can Watch "No Other Land" Online — but Not if You Google It'
 date: "2025-05-08"
 draft: false
 ---
