@@ -78,7 +78,7 @@ Comment: Similar to MusicBrainz Picard, but I didn't really use because it's [no
 
 ## [MediaMonkey](https://www.mediamonkey.com/)
 
-Comment: Also didn't really use this since it's Windows and Android only. Many that organised music in the early 2000s would remember MediamMonkey, good to know the project is still going strong. Note that although there is a free version, there are [higher paid tier versions](https://www.mediamonkey.com/windows), so for serious use it's probably not free.
+Comment: Also didn't really use this since it's Windows and Android only. Many that organised music in the early 2000s would remember MediaMonkey, good to know the project is still going strong. Note that although there is a free version, there are [higher paid tier versions](https://www.mediamonkey.com/windows), so for serious use it's probably not free.
 
 ## [Roon](https://roonlabs.com/)
 

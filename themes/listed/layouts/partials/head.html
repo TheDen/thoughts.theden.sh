@@ -58,7 +58,7 @@
       "license": "{{ .Site.Params.Copyright }}"
     }
   </script>
-  {{ else if .IsPage }} {{ $author := or (.Params.author) (.Site.Author.name) }}
+  {{ else if .IsPage }} {{ $author := or (.Params.author) }}
   {{ $org_name := .Site.Title }}
   <script type="application/ld+json">
     {

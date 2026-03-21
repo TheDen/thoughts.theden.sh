@@ -81,6 +81,6 @@ You can try it yourself, the password to decrypt is `hackerman`.
 some thoughts and ideas
 
 - Encrypted passwords can be stored per domain, e.g., gmail.theden.sh, apple.theden.sh, and a distributed for you via propagation, in a decentralised manner, on a standard protocol without vendor lock-in, portability, and not having to worry about a password management service getting hacked. Down side: I guess you really have to believe that that a bad actor can’t decrypt it. And you have to pay for domain name.
-- With only four TXT recrods that’s ~1KB of compressed data. Some demoscene intros can be stored in TXT records.
+- With only four TXT records that’s ~1KB of compressed data. Some demoscene intros can be stored in TXT records.
 - You could theoretically store an arbitrary amount of data, if there is no limit on the number of TXT records you can create. I haven’t tried this, but would like to know what the limit is.
-  More registrars need to have APIs for updating records. With an API, one could programatically update TXT records.
+  More registrars need to have APIs for updating records. With an API, one could programmatically update TXT records.

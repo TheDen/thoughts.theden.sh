@@ -28,12 +28,12 @@ disableHugoGeneratorInject = true
   [privacy.youtube]
     disable = true
 
-[Author]
+[author]
   name = "TheDen"
 
 [params]
   description = ""
-  author = ""
+  author = "TheDen"
   copyright = ""
   logo = ""
 
