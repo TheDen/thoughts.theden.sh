@@ -1,6 +1,6 @@
 ---
 title: "Indigo Prophecy: The Case for Demos as Game Design"
-date: "2026-01-20"
+date: "2026-02-20"
 draft: false
 ---
 
