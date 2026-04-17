@@ -12,9 +12,6 @@
   "_internal/opengraph.html" . }} {{ template "_internal/schema.html" . }} {{
   template "_internal/twitter_cards.html" . }}
   <link rel="canonical" href="{{ .Permalink | absURL }}" />
-  <meta name="monetization" content="$twitter.xrptipbot.com/ronaldsvilcins" />
-  <!--  <link rel="dns-prefetch" href="https://www.google-analytics.com"> -->
-  <!--  <link href="https://www.google-analytics.com" rel="preconnect" crossorigin> -->
   <link
     rel="alternate"
     type="application/atom+xml"
@@ -27,11 +24,7 @@
     title="{{ .Site.Title }}"
     href="{{ .Site.BaseURL }}feed.json"
   />
-  <link
-    rel="shortcut icon"
-    type="image/png"
-    href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
-  />
+  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
   {{ $styles := resources.Get "scss/styles.scss" | toCSS (dict "outputStyle"
   "compressed") | minify }}
   <link href="{{ .Site.BaseURL }}css/custom.css" rel="stylesheet" />
@@ -39,8 +32,7 @@
   <script>
     document.getElementById("hype").disabled = true;
   </script>
-  <script type="text/javascript" src="{{ .Site.BaseURL }}js/custom.js"></script>
-  <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+  <script src="{{ .Site.BaseURL }}js/custom.js"></script>
 
   <style>
     {{ $styles.Content | safeCSS }}

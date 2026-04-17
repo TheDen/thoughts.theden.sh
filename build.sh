@@ -16,7 +16,6 @@ find ./public/ -type f \( \
   -o -name '*.svg' \
   -o -name "*.xml" \
   -o -name "*.json" \
-  -o -name "*.html" \
   \) \
   -and ! -name "*.min*" -print0 |
   xargs -0 -n1 -P"${cpu_cores}" -I '{}' sh -c 'minify -o "{}" "{}"'
