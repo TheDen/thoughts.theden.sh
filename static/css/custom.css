@@ -1,18 +1,9 @@
-/*
-@font-face {
-	font-family: "console";
-	src: url("px437_toshibasat_9x16.woff2") format("woff2"),
-	url("px437_toshibasat_9x16.woff") format("woff"),
-	url("px437_toshibasat_9x16.ttf") format("truetype");
-	font-display: swap;
-}
-*/
-
 @font-face {
   font-family: "Space Grotesk";
   src: url("/fonts/SpaceGrotesk-Light.ttf") format("truetype");
   font-weight: 300;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -20,6 +11,7 @@
   src: url("/fonts/SpaceGrotesk-Regular.ttf") format("truetype");
   font-weight: 400;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -27,6 +19,7 @@
   src: url("/fonts/SpaceGrotesk-Medium.ttf") format("truetype");
   font-weight: 500;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -34,6 +27,7 @@
   src: url("/fonts/SpaceGrotesk-SemiBold.ttf") format("truetype");
   font-weight: 600;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -41,6 +35,7 @@
   src: url("/fonts/SpaceGrotesk-Bold.ttf") format("truetype");
   font-weight: 700;
   font-style: normal;
+  font-display: swap;
 }
 
 /* Variable Font */
@@ -49,6 +44,23 @@
   src: url("/fonts/SpaceGrotesk-VariableFont_wght.ttf") format("truetype");
   font-weight: 300 700;
   font-style: normal;
+  font-display: swap;
+}
+
+html {
+  background-color: black;
+  scroll-behavior: smooth;
+}
+
+* {
+  font-family: "Space Grotesk" !important;
+  font-weight: 400 !important;
+}
+
+a {
+  color: #990061 !important;
+  font-weight: unset !important;
+  text-decoration: none !important;
 }
 
 a:hover {
@@ -62,6 +74,17 @@ a:hover {
   background-color: #096;
 }
 
+:focus-visible {
+  outline: 2px solid #096;
+  outline-offset: 3px;
+}
+
+.skip-link {
+  background: #990061 !important;
+  color: black !important;
+  padding: 0.4em 1em !important;
+}
+
 header ul a:first-child {
   padding-left: 0px !important;
 }
@@ -69,15 +92,6 @@ header ul a:first-child {
 blockquote {
   font-style: italic !important;
   color: #0062d0 !important;
-}
-
-* {
-  font-family: "Space Grotesk" !important;
-  font-weight: 400 !important;
-}
-
-html {
-  background-color: black;
 }
 
 h1 {
@@ -88,15 +102,6 @@ h1 {
 h2 {
   font-size: 1.25em !important;
   font-weight: bold !important;
-}
-
-.post {
-  font-size: 2em !important;
-  background-color: #d07900 !important;
-  color: black !important;
-  padding: 0.5em;
-  font-weight: bold !important;
-  border-top-right-radius: 2em !important;
 }
 
 h1,
@@ -111,12 +116,52 @@ h6 {
   padding-left: 0.5em !important;
 }
 
+.post {
+  font-size: 2em !important;
+  background-color: #d07900 !important;
+  color: black !important;
+  padding: 0.5em;
+  font-weight: bold !important;
+  border-top-right-radius: 2em !important;
+}
+
+/* Improved readability for post body */
+.content p {
+  line-height: 1.75;
+  margin-bottom: 0.9em;
+}
+
+.content li {
+  line-height: 1.65;
+}
+
 code {
   font-size: 1em !important;
 }
 
+pre {
+  padding: 0.75rem 1rem !important;
+}
+
 li {
   padding-bottom: 0.5em !important;
+}
+
+code,
+pre {
+  overflow: auto !important;
+  text-wrap: wrap;
+}
+
+@media (min-width: 768px) {
+  .button-hype {
+    padding: 0.25em 0.75em;
+  }
+  code,
+  pre {
+    overflow: auto;
+    text-wrap: wrap;
+  }
 }
 
 /* hype button */
@@ -149,23 +194,6 @@ li {
   left: 5px;
 }
 
-@media (min-width: 768px) {
-  .button-hype {
-    padding: 0.25em 0.75em;
-  }
-  code,
-  pre {
-    overflow: auto;
-    text-wrap: wrap;
-  }
-}
-
-code,
-pre {
-  overflow: auto !important;
-  text-wrap: wrap;
-}
-
 .hype-container {
   display: flex;
   align-items: center;
@@ -179,14 +207,7 @@ pre {
   height: 2px;
   border-style: solid !important;
   border-color: #096 !important;
-  border-style: solid !important;
   border-width: 0.1px !important;
-}
-
-a {
-  color: #990061 !important;
-  font-weight: unset !important;
-  text-decoration: none !important;
 }
 
 .hash {
@@ -196,6 +217,7 @@ a {
 .main-links {
   color: #d07900 !important;
 }
+
 .main-links:hover {
   background-color: #d07900 !important;
   color: black !important;
@@ -218,6 +240,6 @@ a {
 }
 
 .about-link:hover {
-  color: #black !important;
+  color: black !important;
   background-color: gray !important;
 }
