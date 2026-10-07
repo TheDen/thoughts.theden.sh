@@ -1,4 +1,6 @@
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+{{- $pages := (where .Site.RegularPages "Section" "posts").ByDate.Reverse -}}
+{{- $author := .Site.Params.author | default .Site.Title -}}
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <!-- Required channel elements -->
     <title>{{ .Site.Title }}</title>
@@ -6,17 +8,21 @@
     <link>{{ .Site.BaseURL }}</link>
     <!-- Optional channel elements -->
     <language>en</language>
-    <copyright>Copyright {{ now.Format "2006"}}, Ronalds Vilcins</copyright>
+    <copyright>Copyright {{ now.Format "2006" }}, {{ $author }}</copyright>
+    {{- with first 1 $pages }}{{ range . }}
     <lastBuildDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>
+    {{- end }}{{ end }}
     <generator>Hugo - gohugo.io</generator>
     <docs>http://cyber.harvard.edu/rss/rss.html</docs>
-    <atom:link href="https://ronaldsvilcins.com/atom.xml" rel="self" type="application/atom+xml"/>
-    {{ range where .Site.RegularPages "Section" "posts" }}
+    {{- with .OutputFormats.Get "rss" }}
+    <atom:link href="{{ .Permalink }}" rel="self" type="application/rss+xml"/>
+    {{- end }}
+    {{ range $pages }}
     <item>
       <title>{{ .Title }}</title>
       <link>{{ .Permalink }}</link>
       <description>{{ .Content | html }}</description>
-      <author>ronalds.vilcins@gmail.com (Ronalds Vilcins)</author>
+      <dc:creator>{{ $author }}</dc:creator>
       <guid>{{ .Permalink }}</guid>
       <pubDate>{{ .Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</pubDate>
     </item>

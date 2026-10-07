@@ -1,5 +1,15 @@
 baseURL = '/'
-languageCode = 'en-us'
+locale = 'en-us'
 title = 'thoughts'
 theme = "listed"
-Params.description = "Denis Khoshaba's blog | theden.sh"
+enableRobotsTXT = true
+
+# `outputs` is not merged in from the theme config, so it has to live here for
+# the JSON feed (feed.json) linked in <head> to actually be generated.
+[outputs]
+  home = ["HTML", "RSS", "JSON"]
+  section = ["HTML"]
+
+[params]
+  description = "Denis Khoshaba's blog | theden.sh"
+  author = "Denis Khoshaba"

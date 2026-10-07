@@ -1,37 +1,43 @@
+{{- $pages := (where .Site.RegularPages "Section" "posts").ByDate.Reverse -}}
+{{- $author := .Site.Params.author | default .Site.Title -}}
 {
-  "version": "https://jsonfeed.org/version/1",
-  "title": "{{ .Site.Title }}",
-  "home_page_url": "{{ .Site.BaseURL }}",
-  "feed_url": "https://ronaldsvilcins.com/feed.json",
-  "description": "{{ .Site.Params.description }}",
-  "icon": "https://ronaldsvilcins.com/assets/apple-touch-icon.png",
-  "favicon": "https://ronaldsvilcins.com/assets/favicon.ico",
+  "version": "https://jsonfeed.org/version/1.1",
+  "title": {{ .Site.Title | jsonify }},
+  "home_page_url": {{ .Site.BaseURL | jsonify }},
+  "feed_url": {{ with .OutputFormats.Get "json" }}{{ .Permalink | jsonify }}{{ else }}{{ "feed.json" | absURL | jsonify }}{{ end }},
+  "description": {{ .Site.Params.description | jsonify }},
+  "favicon": {{ "favicon.ico" | absURL | jsonify }},
   "expired": false,
-  "author": {
-    "name": "Ronalds Vilcins",
-    "url": "https://ronaldsvilcins.com/"
-  },
-  "items": [
-    {{ $list := (where .Site.RegularPages "Section" "posts") }}
-    {{ $len := (len $list) }}
-
-    {{ range $index, $element := $list }}
+  "authors": [
     {
-      "id": {{ sha1 .Title | jsonify }},
-      "title": {{ .Title | jsonify }},
-      "summary": {{ .Description | jsonify }},
-      "content_text": {{ .Content | plainify | jsonify }},
-      "content_html": {{ .Content | jsonify }},
-      "url": {{ .Permalink | jsonify }},
-      "image": "{{ .Site.BaseURL }}photos/{{ .Params.photo }}",
-      "banner_image": "{{ .Site.BaseURL }}photos/{{ .Params.photo }}",
-      "date_published": "{{ .Date.Format `2016-02-09T14:22:00-07:00` | safeHTML }}",
-      "date_modified": "{{ .Date.Format `2016-02-09T14:22:00-07:00` | safeHTML }}",
-      "author": {
-        "name": "Ronalds Vilcins",
-        "url": "https://ronaldsvilcins.com/"
-      }
-    }{{ if ne (add $index 1) $len }},{{ end }}
-    {{ end }}
+      "name": {{ $author | jsonify }},
+      "url": {{ .Site.BaseURL | jsonify }}
+    }
+  ],
+  "items": [
+    {{- range $index, $page := $pages }}
+    {{- if $index }},{{ end }}
+    {
+      "id": {{ $page.Permalink | jsonify }},
+      "title": {{ $page.Title | jsonify }},
+      {{- with $page.Description }}
+      "summary": {{ . | jsonify }},
+      {{- end }}
+      "content_html": {{ $page.Content | jsonify }},
+      "url": {{ $page.Permalink | jsonify }},
+      {{- with $page.Params.images }}
+      "image": {{ (index . 0) | absURL | jsonify }},
+      {{- end }}
+      "date_published": {{ $page.Date.Format "2006-01-02T15:04:05Z07:00" | jsonify }},
+      "date_modified": {{ $page.Lastmod.Format "2006-01-02T15:04:05Z07:00" | jsonify }},
+      "tags": {{ $page.Params.tags | default slice | jsonify }},
+      "authors": [
+        {
+          "name": {{ $author | jsonify }},
+          "url": {{ $.Site.BaseURL | jsonify }}
+        }
+      ]
+    }
+    {{- end }}
   ]
 }

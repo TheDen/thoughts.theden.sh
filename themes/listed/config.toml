@@ -1,12 +1,15 @@
 baseURL = ""
-languageCode = "en-us"
+locale = "en-us"
 title = "thoughts"
 disableKinds = ["section", "categories", "tags"]
 disqusShortname = ""
 pygmentsCodeFences = false
 pygmentsUseClasses = false
-paginate = 9999
 minify = true
+enableRobotsTXT = true
+
+[pagination]
+  pagerSize = 9999
 disableHugoGeneratorInject = true
 
 
@@ -56,11 +59,11 @@ disableHugoGeneratorInject = true
   section = ["HTML"]
 
 [outputFormats.RSS]
-  mediatype = "application/rss"
+  mediaType = "application/rss+xml"
   baseName = "atom"
 
 [outputFormats.JSON]
-  mediatype = "application/json"
+  mediaType = "application/json"
   baseName = "feed"
 
 [sitemap]

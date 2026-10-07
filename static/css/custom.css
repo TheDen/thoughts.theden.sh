@@ -57,6 +57,22 @@ html {
   font-weight: 400 !important;
 }
 
+/* ...but code stays monospace, and bold stays bold */
+code,
+pre,
+kbd,
+samp,
+tt {
+  font-family:
+    ui-monospace, "SF Mono", "SFMono-Regular", Menlo, Monaco, Consolas,
+    "Liberation Mono", "DejaVu Sans Mono", monospace !important;
+}
+
+strong,
+b {
+  font-weight: 700 !important;
+}
+
 a {
   color: #990061 !important;
   font-weight: unset !important;
@@ -94,13 +110,23 @@ blockquote {
   color: #0062d0 !important;
 }
 
-h1 {
+/* In-content headings are demoted one level (the title is the h1), so h2
+   carries the size that markdown's "#" used to get. */
+h1,
+h2 {
   font-size: 1.5em !important;
   font-weight: bold !important;
 }
 
-h2 {
+h3 {
   font-size: 1.25em !important;
+  font-weight: bold !important;
+}
+
+h4,
+h5,
+h6 {
+  font-size: 1.1em !important;
   font-weight: bold !important;
 }
 

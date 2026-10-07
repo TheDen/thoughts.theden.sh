@@ -2,7 +2,9 @@
   <meta charset="utf-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="author" content="Denis Khoshaba" />
+  <meta name="author" content="{{ .Site.Params.author }}" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#000000" />
   <title>
     {{ if eq .IsHome true }}{{ .Site.Title }}{{ else }}{{ .Title }} | {{
     .Site.Title }}{{ end }}
@@ -14,7 +16,7 @@
   <link rel="canonical" href="{{ .Permalink | absURL }}" />
   <link
     rel="alternate"
-    type="application/atom+xml"
+    type="application/rss+xml"
     title="{{ .Site.Title }}"
     href="{{ .Site.BaseURL }}atom.xml"
   />
@@ -50,7 +52,7 @@
       "license": "{{ .Site.Params.Copyright }}"
     }
   </script>
-  {{ else if .IsPage }} {{ $author := or (.Params.author) }}
+  {{ else if .IsPage }} {{ $author := or .Params.author .Site.Params.author }}
   {{ $org_name := .Site.Title }}
   <script type="application/ld+json">
     {
@@ -61,7 +63,7 @@
         "headline": "{{ .Title | safeJS }}",
         "alternativeHeadline": "{{ .Params.lead }}",
         "description": "{{ if .Description }}{{ .Description | safeJS }}{{ else }}{{if .IsPage}}{{ .Summary  }}{{ end }}{{ end }}",
-        "inLanguage": {{ .Site.LanguageCode | default "en-us" }},
+        "inLanguage": {{ .Site.Language.Locale | default "en-us" }},
         "isFamilyFriendly": "true",
         "mainEntityOfPage": {
             "@type": "WebPage",

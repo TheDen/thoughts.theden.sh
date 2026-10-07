@@ -1,1 +1,4 @@
-<h{{ .Level }} id="{{ .Anchor | safeURL }}">{{ .Text | safeHTML }} <a href="#{{ .Anchor | safeURL }}" class="hash g">#</a></h{{ .Level }}>
+{{- /* The page title is the h1, so demote in-content headings by one level. */ -}}
+{{- $level := add .Level 1 -}}
+{{- if gt $level 6 }}{{ $level = 6 }}{{ end -}}
+<h{{ $level }} id="{{ .Anchor | safeURL }}">{{ .Text | safeHTML }} <a href="#{{ .Anchor | safeURL }}" class="hash g">#</a></h{{ $level }}>
