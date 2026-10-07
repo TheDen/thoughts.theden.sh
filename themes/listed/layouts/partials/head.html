@@ -29,12 +29,19 @@
   <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
   {{ $styles := resources.Get "scss/styles.scss" | toCSS (dict "outputStyle"
   "compressed") | minify }}
+  <link
+    rel="preload"
+    href="{{ .Site.BaseURL }}fonts/SpaceGrotesk-VariableFont_wght.ttf"
+    as="font"
+    type="font/ttf"
+    crossorigin
+  />
   <link href="{{ .Site.BaseURL }}css/custom.css" rel="stylesheet" />
   <link rel="stylesheet" href="{{ .Site.BaseURL }}css/hype.css" id="hype" />
   <script>
     document.getElementById("hype").disabled = true;
   </script>
-  <script src="{{ .Site.BaseURL }}js/custom.js"></script>
+  <script src="{{ .Site.BaseURL }}js/custom.js" defer></script>
 
   <style>
     {{ $styles.Content | safeCSS }}
