@@ -4,6 +4,11 @@ title = 'thoughts'
 theme = "listed"
 enableRobotsTXT = true
 
+# No post uses tags/categories, so these only produced empty list pages. The
+# theme sets disableKinds too, but with pre-0.73 kind names and in a theme
+# config, neither of which applies.
+disableKinds = ["taxonomy", "term"]
+
 # `outputs` is not merged in from the theme config, so it has to live here for
 # the JSON feed (feed.json) linked in <head> to actually be generated.
 [outputs]
