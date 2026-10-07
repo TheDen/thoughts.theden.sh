@@ -161,8 +161,10 @@ h6 {
   line-height: 1.65;
 }
 
+/* `small` is an absolute-size keyword, so inline code and code inside <pre>
+   both land on the same size instead of 1em resolving against a 16px <p>. */
 code {
-  font-size: 1em !important;
+  font-size: small !important;
 }
 
 pre {
