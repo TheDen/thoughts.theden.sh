@@ -63,7 +63,7 @@
         "headline": "{{ .Title | safeJS }}",
         "alternativeHeadline": "{{ .Params.lead }}",
         "description": "{{ if .Description }}{{ .Description | safeJS }}{{ else }}{{if .IsPage}}{{ .Summary  }}{{ end }}{{ end }}",
-        "inLanguage": {{ .Site.Language.Locale | default "en-us" }},
+        "inLanguage": {{ .Site.Language.Lang | default "en" }},
         "isFamilyFriendly": "true",
         "mainEntityOfPage": {
             "@type": "WebPage",
