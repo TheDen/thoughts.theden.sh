@@ -4,7 +4,9 @@
    variable face is declared last and wins the 700 match anyway. */
 @font-face {
   font-family: "Space Grotesk";
-  src: url("/fonts/SpaceGrotesk-VariableFont_wght.ttf") format("truetype");
+  src:
+    url("/fonts/SpaceGrotesk-VariableFont_wght.woff2") format("woff2"),
+    url("/fonts/SpaceGrotesk-VariableFont_wght.ttf") format("truetype");
   font-weight: 300 700;
   font-style: normal;
   font-display: swap;
